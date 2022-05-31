@@ -1,0 +1,20 @@
+@media only screen and (max-width: 992px) {
+  .navbar-collapse {
+    padding: 15px 20px 40px;
+    height: auto;
+    transition: transform 300ms;
+    background-color: white;
+    box-shadow: 0 1px 4px 1px #ccc;
+    position: fixed;
+    top: 0;
+    right: 0;
+    visibility: visible;
+    display: unset;
+    z-index: 300;
+  }
+  .navbar-collapse.collapse {
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 300ms;
+  }
+}
