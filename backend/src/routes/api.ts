@@ -15,7 +15,11 @@ const apiRouter = Router();
 // Add api routes
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/users', adminMw, userRouter);
+apiRouter.use('/bus-lines', adminMw, busLineRouter);
+apiRouter.use('/bus-line-stations', adminMw, busLineStationRouter);
+apiRouter.use('/admin', adminMw, adminRouter);
 apiRouter.use('/companies', adminMw, adminCompanyRouter);
+apiRouter.use('/tickets', adminMw, adminTicketRouter);
 
 // Export default
 export default apiRouter;
