@@ -1,4 +1,5 @@
 import React from "react"
+import { AuthProvider } from "./context/authentication"
 import ReactDOM from "react-dom/client"
 import "./index.css"
 import App from "./App"
@@ -9,7 +10,9 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       {/* Wrap user context here */}
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 )

@@ -1,8 +1,10 @@
-import "./navbar.css"
 import { useState } from "react"
+import { useAuthState } from "../../context/authentication"
+import "./navbar.css"
 import { NavLink } from "react-router-dom"
 
 const Navbar = () => {
+  const user = useAuthState()
   const [menu, setMenu] = useState(false)
   function openMenu() {
     setMenu(!menu)
@@ -57,17 +59,21 @@ const Navbar = () => {
                 Početna
               </NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink
-                className={({ isActive }) =>
-                  `nav-link active ${isActive ? "active" : ""}`
-                }
-                aria-current="page"
-                to="/"
-              >
-                Blabla
-              </NavLink>
-            </li>
+            {user.token == "" ? (
+              <li className="nav-item">
+                <NavLink
+                  className={({ isActive }) =>
+                    `nav-link active ${isActive ? "active" : ""}`
+                  }
+                  aria-current="page"
+                  to="/login"
+                >
+                  Login
+                </NavLink>
+              </li>
+            ) : (
+              ""
+            )}
 
             <li className="nav-item">
               <a className="nav-link disabled" href="#" aria-disabled="true">

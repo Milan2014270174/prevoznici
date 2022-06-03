@@ -1,0 +1,11 @@
+.hero {
+  height: 350px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position-x: right;
+  background-color: rgb(249, 249, 249);
+  padding: 0px 5%;
+}
+.hero h1 {
+  width: 50%;
+}
