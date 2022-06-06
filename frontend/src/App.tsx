@@ -8,6 +8,9 @@ import Login from "./pages/Login/Login"
 import Home from "./pages/Home/Home"
 import AppWrapper from "./components/AppWrapper/AppWrapper"
 import Loading from "./components/Loading/Loading"
+import Register from "./pages/Register/Register"
+import Reservations from "./pages/Reservations/Reservations"
+import Prevoznici from "./pages/Prevoznici/Prevoznici"
 
 function App() {
   const [loading, setLoading] = useState(true)
@@ -27,19 +30,41 @@ function App() {
     <div className="App">
       {!loading ? (
         <Routes>
-          <Route>
-            <Route path="/" element={<AppWrapper />}>
-              <Route index element={<Home />} />
-              <Route
-                path="/login"
-                element={
-                  <PublicRoute
-                    Component={<Login />}
-                    isAuthenticated={loggedIn}
-                  />
-                }
-              />
-            </Route>
+          <Route path="/" element={<AppWrapper />}>
+            <Route index element={<Home />} />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute Component={<Login />} isAuthenticated={loggedIn} />
+              }
+            />
+            <Route
+              path="/registracija"
+              element={
+                <PublicRoute
+                  Component={<Register />}
+                  isAuthenticated={loggedIn}
+                />
+              }
+            />
+            <Route
+              path="/prevoznici"
+              element={
+                <PublicRoute
+                  Component={<Prevoznici />}
+                  isAuthenticated={loggedIn}
+                />
+              }
+            />
+            <Route
+              path="/rezervacije"
+              element={
+                <PublicRoute
+                  Component={<Reservations />}
+                  isAuthenticated={loggedIn}
+                />
+              }
+            />
           </Route>
         </Routes>
       ) : (

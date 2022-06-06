@@ -12,7 +12,7 @@ const Navbar = () => {
 
   return (
     <div className="navbar navbar-expand-lg navbar-light bg-light">
-      <div className="container-fluid">
+      <div className="container-fluid container">
         <NavLink className={`navbar-brand`} aria-current="page" to="/">
           AutobuskeKarte
         </NavLink>
@@ -47,7 +47,7 @@ const Navbar = () => {
               <i className="fa-solid fa-times"></i>
             </button>
           </div>
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+          <ul className="navbar-nav w-100 mb-2 mb-lg-0 justify-content-end">
             <li className="nav-item">
               <NavLink
                 className={({ isActive }) =>
@@ -57,6 +57,28 @@ const Navbar = () => {
                 to="/"
               >
                 Početna
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink
+                className={({ isActive }) =>
+                  `nav-link active ${isActive ? "active" : ""}`
+                }
+                aria-current="page"
+                to="/prevoznici"
+              >
+                Prevoznici
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink
+                className={({ isActive }) =>
+                  `nav-link active ${isActive ? "active" : ""}`
+                }
+                aria-current="page"
+                to="/rezervacije"
+              >
+                Rezervacije
               </NavLink>
             </li>
             {user.token == "" ? (
@@ -77,7 +99,7 @@ const Navbar = () => {
 
             <li className="nav-item">
               <a className="nav-link disabled" href="#" aria-disabled="true">
-                Disabled
+                Logout
               </a>
             </li>
           </ul>
