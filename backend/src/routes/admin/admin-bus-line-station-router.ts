@@ -1,10 +1,10 @@
 import StatusCodes from 'http-status-codes';
 import { Request, Response, Router } from 'express';
-import busLineStationService from '../services/bus-line-station-service';
+import busLineStationService from '../../services/bus-line-station-service';
 import { body, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
-import { IBusLineStation } from '../models/bus_line_station-model';
+import { IBusLineStation } from '../../models/bus_line_station-model';
 
 
 

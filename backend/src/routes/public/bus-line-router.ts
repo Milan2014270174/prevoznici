@@ -1,7 +1,8 @@
 import StatusCodes from 'http-status-codes';
 import { Request, Response, Router } from 'express';
+import busLineService from '../../services/bus-line-service';
+import { body, validationResult } from 'express-validator';
 
-import userService from '@services/user-service';
 import { ParamMissingError } from '@shared/errors';
 
 
@@ -21,26 +22,13 @@ export const p = {
 
 
 /**
- * Get all users.
+ * Get all busLines.
  */
 router.get(p.get, async (_: Request, res: Response) => {
-  const users = await userService.getAll();
-  return res.status(OK).json({ users });
+  const busLines = await busLineService.getAll();
+  return res.status(OK).json({ busLines });
 });
 
-
-/**
- * Add one user.
- */
-router.post(p.add, async (req: Request, res: Response) => {
-  const { user } = req.body;
-  // Check param
-  if (!user) {
-    throw new ParamMissingError();
-  }
-  await userService.addOne(user);
-  return res.status(CREATED).end();
-});
 
 // Export default
 export default router;

@@ -1,6 +1,6 @@
 import StatusCodes from 'http-status-codes';
 import { Request, Response, Router } from 'express';
-import busLineService from '../services/bus-line-service';
+import busLineService from '../../services/bus-line-service';
 import { body, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
@@ -18,18 +18,6 @@ export const p = {
   update: '/update',
   delete: '/delete/:id',
 } as const;
-
-
-
-/**
- * Get all busLines.
- */
-router.get(p.get, async (_: Request, res: Response) => {
-  const busLines = await busLineService.getAll();
-  return res.status(OK).json({ busLines });
-});
-
-
 
 /**
  * Add one busLine.

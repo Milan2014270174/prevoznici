@@ -81,7 +81,37 @@ async function getByBusLineId(buslineId: number, loadStations = false):
     `SELECT * FROM ${TABLE} 
     JOIN bus_line_station ON ticket.to_bus_line_station_id = bus_line_station.bus_line_station_id
     JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
-    WHERE bus_line.bus_line_id = ${buslineId}
+    WHERE ticket.bus_line_id = ${buslineId}
+    ORDER BY arrives_at
+    `
+  ));
+
+  const tickets = rows as (ITicket & IBusLine & IBusLineStation)[];
+
+  if (loadStations)
+    for (const ticket of tickets) {
+
+      ticket.toStation = await loadBusStation(ticket.to_bus_line_station_id);
+      ticket.fromStation = await loadBusStation(ticket.from_bus_line_station_id);
+
+    }
+
+  return tickets;
+}
+
+/**
+ * Get all tickets on specified line.
+ * 
+ * @returns 
+ */
+async function getByUserId(userId: number, loadStations = false):
+  Promise<(ITicket & IBusLine & IBusLineStation)[]> {
+
+  const { rows, fields } = (await db.query(
+    `SELECT * FROM ${TABLE} 
+    JOIN bus_line_station ON ticket.to_bus_line_station_id = bus_line_station.bus_line_station_id
+    JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
+    WHERE ticket.user_id = ${userId}
     ORDER BY arrives_at
     `
   ));
@@ -121,6 +151,7 @@ async function loadBusStation(bus_line_station_id: number):
 
 // Export default
 export default {
+  getByUserId,
   getByBusLineId,
   getAll,
   create

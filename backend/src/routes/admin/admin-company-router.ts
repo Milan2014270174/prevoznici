@@ -5,7 +5,7 @@ import companyService from '@services/company-service';
 import { ParamMissingError } from '@shared/errors';
 
 import { body, validationResult } from 'express-validator';
-import { ICompany } from '../models/company-model';
+import { ICompany } from '../../models/company-model';
 
 
 

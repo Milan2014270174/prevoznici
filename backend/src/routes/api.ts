@@ -1,25 +1,32 @@
 import { Router } from 'express';
-import { adminMw } from './middleware';
+import { adminMw, userMw } from './middleware';
 import authRouter from './auth-router';
-import userRouter from './user-router';
-import adminRouter from './admin-router';
-import busLineRouter from './admin-bus-line-router';
-import busLineStationRouter from './admin-bus-line-station-router';
-import adminCompanyRouter from './admin-company-router';
-import adminTicketRouter from './admin-ticket-router';
+import adminUserRouter from './admin/admin-user-router';
+import adminBusLineRouter from './admin/admin-bus-line-router';
+import adminBusLineStationRouter from './admin/admin-bus-line-station-router';
+import adminCompanyRouter from './admin/admin-company-router';
+import adminTicketRouter from './admin/admin-ticket-router';
 
 
 // Init
 const apiRouter = Router();
 
-// Add api routes
+// Admin rute
+apiRouter.use('/users', adminMw, adminUserRouter);
+apiRouter.use('/admin/bus-lines', adminMw, adminBusLineRouter);
+apiRouter.use('/admin/bus-line-stations', adminMw, adminBusLineStationRouter);
+apiRouter.use('/admin/companies', adminMw, adminCompanyRouter);
+apiRouter.use('/admin/tickets', adminMw, adminTicketRouter);
+
+// User rute
+apiRouter.use('/user/tickets', userMw, adminTicketRouter);
+
+
+// Public rute
+apiRouter.use('/bus-lines', adminBusLineRouter);
+apiRouter.use('/bus-line-stations', adminBusLineStationRouter);
+apiRouter.use('/companies', adminCompanyRouter);
 apiRouter.use('/auth', authRouter);
-apiRouter.use('/users', adminMw, userRouter);
-apiRouter.use('/bus-lines', adminMw, busLineRouter);
-apiRouter.use('/bus-line-stations', adminMw, busLineStationRouter);
-apiRouter.use('/admin', adminMw, adminRouter);
-apiRouter.use('/companies', adminMw, adminCompanyRouter);
-apiRouter.use('/tickets', adminMw, adminTicketRouter);
 
 // Export default
 export default apiRouter;

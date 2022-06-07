@@ -6,12 +6,22 @@ import busLineRepo from '../database/bus_line-repo'
 
 
 /**
- * Get all users.
+ * Get all tickets.
  * 
  * @returns 
  */
 function getAll(): Promise<ITicket[]> {
   return ticketRepo.getAll();
+}
+
+/**
+ * Get all user's tickets.
+ * @param uid
+ * @returns 
+ */
+function getUsersTickets(uid: number): Promise<ITicket[]> {
+
+  return ticketRepo.getByUserId(uid, true);
 }
 
 
@@ -177,9 +187,12 @@ function getSeatCalculationsOnlyNumberOfFreeSeats(
 }
 
 
+
+
 // Export default
 export default {
   // delete: deleteOne,
+  getUsersTickets,
   getSeatCalculationsOnlyNumberOfFreeSeats,
   getAll,
   addOne,
