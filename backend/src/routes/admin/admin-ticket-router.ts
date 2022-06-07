@@ -44,6 +44,7 @@ router.post(p.add,
   body('passenger_name').isString(),
   body('is_paid').isBoolean().default(true).optional(),
   body('to_bus_line_station_id'),
+  body('user_id'),
   body('from_bus_line_station_id')
     .if(body('to_bus_line_station_id').exists())
     .notEmpty()
@@ -61,11 +62,6 @@ router.post(p.add,
     if (!ticket) {
       throw new ParamMissingError();
     }
-
-    const user =
-      await jwtUtil.decode(req.headers.authorization?.substring(7, 9999) as string) as any;
-
-    ticket.user_id = user.id;
 
     const insertedTicket = await ticketService.addOne(ticket);
     return res.status(CREATED).json({ ticket: insertedTicket });

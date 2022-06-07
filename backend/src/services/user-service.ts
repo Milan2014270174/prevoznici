@@ -10,7 +10,7 @@ import { UserNotFoundError } from '@shared/errors';
  * @returns 
  */
 function getAll(): Promise<IUser[]> {
-    return userRepo.getAll();
+  return userRepo.getAll();
 }
 
 
@@ -21,13 +21,25 @@ function getAll(): Promise<IUser[]> {
  * @returns 
  */
 function addOne(user: IUser): Promise<IUser | null> {
-    return userRepo.create(user);
+  return userRepo.create(user);
+}
+
+
+/**
+ * Get one user.
+ * 
+ * @param user 
+ * @returns 
+ */
+function getByEmail(user: IUser): Promise<IUser | null> {
+  return userRepo.getByEmail(user.email);
 }
 
 
 
 // Export default
 export default {
-    getAll,
-    addOne,
+  getByEmail,
+  getAll,
+  addOne,
 } as const;
