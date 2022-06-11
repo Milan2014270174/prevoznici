@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import "./home.css"
 import Accordion from "../../components/Accordion/Accordion"
-import PlannedLines from "../../components/PlannedLines/PlannedLines"
+import PlannedLine from "../../components/PlannedLine/PlannedLine"
 import axiosClient from "../../axios/axiosClient"
 import Modal from "../../components/Modal/Modal"
 
@@ -70,7 +70,7 @@ const Home = () => {
         className="hero d-flex justify-content-start align-items-center"
         style={{ backgroundImage: `url('images/hero.png')` }}
       >
-        <h1 className="title">Dobrodošli na online prodaju karata</h1>
+        <h1 className="title">Online prodaja karata</h1>
       </div>
       <div className="container py-5">
         <div className="search-wrapper">
@@ -82,11 +82,11 @@ const Home = () => {
                 name="companies"
                 value={input.companies}
                 onChange={handleInputChange}
-                className="select"
+                className="select form-select"
                 placeholder="Prevoznici"
               >
-                <option>-</option>
-                <option>SingiBus</option>
+                <option value="">Izaberi prevoznika</option>
+                <option value="SingiBus">SingiBus</option>
                 <option>BlablaBus</option>
               </select>
             </div>
@@ -96,10 +96,11 @@ const Home = () => {
                 name="startDestination"
                 id="startDestination"
                 placeholder="Mesto polaska"
+                className="select form-select"
                 value={input.startDestination}
                 onChange={handleInputChange}
               >
-                <option>-</option>
+                <option value="">Izaberi mesto polaska</option>
                 <option>Beograd</option>
                 <option>Niš</option>
                 <option>Novi Sad</option>
@@ -110,10 +111,12 @@ const Home = () => {
               <select
                 name="endDestination"
                 id="endDestination"
+                className="select form-select"
                 value={input.endDestination}
                 onChange={handleInputChange}
               >
-                <option>-</option>
+                <option value="">Izaberi mesto dolaska</option>
+
                 <option>Beograd</option>
                 <option>Niš</option>
                 <option>Novi Sad</option>
@@ -127,7 +130,7 @@ const Home = () => {
                 value={input.date}
                 onChange={handleDateChange}
                 type="date"
-                className="date"
+                className="form-control"
               />
             </div>
           </div>
@@ -136,7 +139,7 @@ const Home = () => {
         <div className="item-list my-5">
           <Accordion
             header={
-              <PlannedLines.Header
+              <PlannedLine.Header
                 company=""
                 startDestination=""
                 endDestination=""
@@ -145,7 +148,7 @@ const Home = () => {
               />
             }
             body={
-              <PlannedLines.Body
+              <PlannedLine.Body
                 seats={0}
                 seatsTotal={0}
                 destinations={[]}
@@ -157,7 +160,7 @@ const Home = () => {
           />
           <Accordion
             header={
-              <PlannedLines.Header
+              <PlannedLine.Header
                 company=""
                 startDestination=""
                 endDestination=""
@@ -166,7 +169,7 @@ const Home = () => {
               />
             }
             body={
-              <PlannedLines.Body
+              <PlannedLine.Body
                 seats={0}
                 seatsTotal={0}
                 destinations={[]}

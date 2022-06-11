@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react"
 import "./login.css"
 import axiosClient from "../../axios/axiosClient"
+import { useAuthDispatch, useAuthState } from "../../context/authentication"
+import { setToken } from "../../axios/axiosClient"
 
 const Login = () => {
+  const dispatch = useAuthDispatch()
+  const user = useAuthState()
+
   const [input, setInput] = useState({
     email: "",
     password: "",
@@ -24,10 +29,26 @@ const Login = () => {
       setInput({ ...input, error: true })
     } else {
       console.log("submit")
+      dispatch({ type: "REQUEST_AUTH" })
       axiosClient
         .post("/auth/login", { email: input.email, password: input.password })
         .then((res) => {
           console.log(res.data)
+          let token = res.data.token
+          localStorage.setItem("prevozniciJWT", token)
+          setToken()
+          axiosClient
+            .get("/user")
+            .then((res) => {
+              console.log(res.data)
+              dispatch({
+                type: "HANDLE_LOGIN",
+                payload: { token: res.data.token }
+              })
+            })
+            .catch((err) => {
+              console.log("/user error", err)
+            })
         })
         .catch((err) => {
           console.log("err", err)
@@ -36,8 +57,9 @@ const Login = () => {
   }
 
   return (
-    <div className="login-page">
+    <div className="login-page py-5">
       <div className="container">
+        <h1 className="mb-3">Login</h1>
         <form onSubmit={handleSubmit} className="mb-3 needs-validation ">
           <div className="mb-3">
             <label htmlFor="exampleInputEmail1" className="form-label">

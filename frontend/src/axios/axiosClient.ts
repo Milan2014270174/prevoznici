@@ -4,6 +4,7 @@ const axiosClient = axios.create()
 
 // authHeader();
 interface CommonHeaderProperties extends HeadersDefaults {
+  "Content-Type": string
   Accept: string
   Authorization: string
 }
@@ -11,6 +12,7 @@ interface CommonHeaderProperties extends HeadersDefaults {
 axiosClient.defaults.baseURL = "http://localhost:3000/api"
 
 axiosClient.defaults.headers = {
+  "Content-Type": "application/json",
   Accept: "application/json",
   Authorization: authHeader()
 } as CommonHeaderProperties
@@ -24,5 +26,5 @@ export function setToken() {
 }
 
 function authHeader() {
-  return localStorage.getItem("prevozniciJWT")
+  return "Bearer " + localStorage.getItem("prevozniciJWT")
 }

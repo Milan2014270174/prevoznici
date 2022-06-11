@@ -8,17 +8,22 @@ interface AccordionProps {
 
 const Accordion = ({ header, body }: AccordionProps) => {
   const [collapsed, setCollapsed] = useState(true)
+
+  function handleCollapse() {
+    setCollapsed(!collapsed)
+  }
+
   return (
     <div className="accordion-item">
       <h2 className="accordion-header" id="headingOne">
         <button
-          className={`accordion-button ${collapsed ? "collapsed" : ""}`}
+          className={`accordion-button ${collapsed ? "" : "collapsed"}`}
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#collapseOne"
           aria-expanded={collapsed ? "false" : `true`}
           aria-controls="collapseOne"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => handleCollapse()}
         >
           {header}
         </button>

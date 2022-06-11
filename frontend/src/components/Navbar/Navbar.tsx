@@ -1,13 +1,24 @@
 import { useState } from "react"
-import { useAuthState } from "../../context/authentication"
+import { useAuthDispatch, useAuthState } from "../../context/authentication"
 import "./navbar.css"
 import { NavLink } from "react-router-dom"
 
 const Navbar = () => {
+  const dispatch = useAuthDispatch()
+
   const user = useAuthState()
+
   const [menu, setMenu] = useState(false)
+
   function openMenu() {
     setMenu(!menu)
+  }
+
+  function logout() {
+    dispatch({ type: "REQUEST_AUTH" })
+    setTimeout(() => {
+      dispatch({ type: "LOGOUT" })
+    }, 2000)
   }
 
   return (
@@ -81,7 +92,7 @@ const Navbar = () => {
                 Rezervacije
               </NavLink>
             </li>
-            {user.token == "" ? (
+            {Object.keys(user.user).length === 0 ? (
               <li className="nav-item">
                 <NavLink
                   className={({ isActive }) =>
@@ -97,11 +108,15 @@ const Navbar = () => {
               ""
             )}
 
-            <li className="nav-item">
-              <a className="nav-link disabled" href="#" aria-disabled="true">
-                Logout
-              </a>
-            </li>
+            {Object.keys(user.user).length > 0 ? (
+              <li className="nav-item">
+                <p className="nav-link text-link" onClick={() => logout()}>
+                  Logout
+                </p>
+              </li>
+            ) : (
+              ""
+            )}
           </ul>
         </div>
       </div>

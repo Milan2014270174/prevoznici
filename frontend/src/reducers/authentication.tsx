@@ -5,14 +5,14 @@ import React, { useReducer } from "react"
 let token = localStorage.getItem("prevozniciJWT")
 
 type AuthType = {
-  userDetails: {}
+  user: {}
   token: string
   loading: boolean
   errorMessage: string
 }
 
 export const initialState = {
-  userDetails: {},
+  user: {},
   token: token || "",
   loading: false,
   errorMessage: ""
@@ -25,12 +25,12 @@ type ActionType = {
 
 export const AuthReducer = (initialState: AuthType, action: ActionType) => {
   switch (action.type) {
-    case "REQUEST_LOGIN":
+    case "REQUEST_AUTH":
       return {
         ...initialState,
         loading: true
       }
-    case "LOGIN_SUCCESS":
+    case "HANDLE_LOGIN":
       return {
         ...initialState,
         user: action.payload.user,
@@ -40,7 +40,8 @@ export const AuthReducer = (initialState: AuthType, action: ActionType) => {
     case "LOGOUT":
       return {
         ...initialState,
-        user: "",
+        loading: false,
+        user: {},
         token: ""
       }
 

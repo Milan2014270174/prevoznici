@@ -1,1 +1,21 @@
 /* Global styles */
+
+input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.text-link {
+  cursor: pointer;
+}
+
+.fixed-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

@@ -1,5 +1,5 @@
 import React from "react"
-import "./planned-lines.css"
+import "./planned-line.css"
 
 interface HeaderProps {
   company: string
