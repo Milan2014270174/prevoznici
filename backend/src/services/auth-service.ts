@@ -45,8 +45,12 @@ async function login(email: string, password: string): Promise<string> {
 async function register(email: string, password: string, name: string): Promise<IUser | null> {
   // Fetch user
 
-  console.log(email, password, name);
+
   const salt = await bcrypt.genSalt();
+
+  if (await userRepo.getByEmail(email))
+    throw new Error('Korisnik sa ovom email adresom već postoji.')
+
   const user = await userRepo.create({
     email,
     password: await bcrypt.hash(password, 10),
