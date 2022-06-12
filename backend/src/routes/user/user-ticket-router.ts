@@ -19,6 +19,7 @@ const { CREATED, OK } = StatusCodes;
 export const p = {
   get: '/my',
   add: '/add',
+  update: '/update',
 } as const;
 
 
@@ -43,14 +44,14 @@ router.get(p.get, async (req: Request, res: Response) => {
 router.post(p.add,
   body('reserved_for_date_at').isDate().isAfter(new Date().toISOString()),
   body('ticket_type').isIn(['POVRATNA', 'U JEDNOM SMERU']),
-  body('passenger_name').isString(),
   body('is_paid').isBoolean().default(true).optional(),
   body('to_bus_line_station_id'),
   body('from_bus_line_station_id')
     .if(body('to_bus_line_station_id').exists())
     .notEmpty()
     .custom((value, { req }) => value !== req.body.to_bus_line_station_id),
-  body('roud_trip_ticket_id').if(body('ticket_type').equals('POVRATNA')).notEmpty(),
+  body('reserved_roundtrip_at').if(body('ticket_type').equals('POVRATNA')).notEmpty(),
+
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
@@ -72,6 +73,7 @@ router.post(p.add,
     const insertedTicket = await ticketService.addOne(ticket);
     return res.status(CREATED).json({ ticket: insertedTicket });
   });
+
 
 
 // Export default

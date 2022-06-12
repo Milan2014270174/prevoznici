@@ -1,10 +1,10 @@
 import * as db from './database-connector';
 import { getRandomInt } from '@shared/functions';
 import { IBusLine } from '../models/bus_line-model';
-import { IStation } from '../models/station';
 import { IBusLineStation } from '../models/bus_line_station-model';
 import busLineStationRepo from './bus_line_station-repo';
-import stationRepo from './station-repo';
+import { ICity } from '../models/city-model';
+import cityRepo from './city-repo';
 
 const TABLE = 'bus_line';
 
@@ -56,7 +56,7 @@ async function create(params: IBusLine): Promise<IBusLine | null> {
   ));
 
 
-  if (!result.affectedRows) {
+  if (!result?.affectedRows) {
 
     return null;
   }
@@ -80,17 +80,17 @@ async function getAll(): Promise<IBusLine[]> {
 
   const bus_lines = rows as IBusLine[];
 
-  for (const busLine of bus_lines) {
+  // for (const busLine of bus_lines) {
 
-    busLine.stations = await loadStations(busLine.bus_line_id as number);
-  }
+  //   busLine.stations = await loadStations(busLine.bus_line_id as number);
+  // }
 
   return bus_lines;
 }
 
 
 async function loadStations(bus_line_id: number):
-  Promise<(IStation & { arrives_at: string, bus_line_station_type: string })[]> {
+  Promise<(ICity & { arrives_at: string, bus_line_station_type: string })[]> {
 
 
   const busLineStations = await busLineStationRepo.getByBusLineId(bus_line_id);
@@ -98,7 +98,7 @@ async function loadStations(bus_line_id: number):
   const stations = [];
   for (const bls of busLineStations) {
 
-    const station = await stationRepo.getById(bls.station_id);
+    const station = await cityRepo.getById(bls.station_id);
 
     if (station)
       stations.push({

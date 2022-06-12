@@ -55,7 +55,7 @@ router.post(p.add,
 
     // Fetch data
     const inserted = await companyService.addOne(company);
-    return res.status(CREATED).json({ company: inserted });
+    return res.status(CREATED).json({ company: inserted, message: 'Uspešno dodata nova kompanija.' });
   });
 
 router.delete(p.delete,

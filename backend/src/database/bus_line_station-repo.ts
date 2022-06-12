@@ -1,6 +1,5 @@
 import * as db from './database-connector';
 import { getRandomInt } from '@shared/functions';
-import { IStation } from '../models/station';
 import { IBusLineStation } from '../models/bus_line_station-model';
 
 
@@ -8,14 +7,14 @@ const TABLE = 'bus_line_station';
 
 
 const RELATED_TABLES = {
-  STATION: 'station',
+  CITY: 'city'
 }
 
 const JOIN_TABLES = {
-  STATION: `
-    INNER JOIN ${RELATED_TABLES.STATION}
-    ON ${TABLE}.station_id = ${RELATED_TABLES.STATION}.station_id
-    `
+  CITY: `
+    INNER JOIN ${RELATED_TABLES.CITY}
+    ON ${RELATED_TABLES.CITY}.city_id = ${RELATED_TABLES.CITY}.city_id
+    `,
 }
 
 /**
@@ -40,11 +39,11 @@ async function getById(bus_line_station_id: number): Promise<IBusLineStation | n
  * @param bus_line_id 
  * @returns 
  */
-async function getByBusLineId(bus_line_id: number, joinStations = false):
+async function getByBusLineId(bus_line_id: number, joinCity = false):
   Promise<IBusLineStation[]> {
   const { rows, fields } = (await db.query(
     `SELECT * FROM ${TABLE} 
-    ${joinStations ? JOIN_TABLES.STATION : ''}
+    ${joinCity ? JOIN_TABLES.CITY : ''}
     WHERE bus_line_id = ?
     ORDER BY arrives_at
     `, [bus_line_id]

@@ -10,6 +10,11 @@ import adminTicketRouter from './admin/admin-ticket-router';
 import userTicketRouter from './user/user-ticket-router';
 import userMeRouter from './user/user-me-router';
 
+import busLineRouter from './public/bus-line-router';
+import busLineStationRouter from './public/bus-line-station-router';
+import companyRouter from './public/company-router';
+import ticketRouter from './public/ticket-router';
+
 
 // Init
 const apiRouter = Router();
@@ -27,9 +32,10 @@ apiRouter.use('/user', userMw, userMeRouter);
 
 
 // Public rute
-apiRouter.use('/bus-lines', adminBusLineRouter);
-apiRouter.use('/bus-line-stations', adminBusLineStationRouter);
-apiRouter.use('/companies', adminCompanyRouter);
+apiRouter.use('/bus-lines', busLineRouter);
+apiRouter.use('/tickets', ticketRouter);
+apiRouter.use('/bus-line-stations', busLineStationRouter);
+apiRouter.use('/companies', companyRouter);
 apiRouter.use('/auth', authRouter);
 
 // Export default

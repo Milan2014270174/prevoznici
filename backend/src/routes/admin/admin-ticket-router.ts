@@ -33,6 +33,23 @@ router.get(p.get, async (_: Request, res: Response) => {
   return res.status(OK).json({ tickets });
 });
 
+router.put(p.update,
+  body('ticket_id').notEmpty(),
+  body('ticket').notEmpty(),
+  async (req: Request, res: Response) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const body = req.body;
+
+    await ticketService.update(body.ticket_id, body.ticket);
+    return res.status(OK).json({ message: 'Uspešno izmenjena karta.' });
+  });
+
+
 
 
 /**
@@ -41,7 +58,6 @@ router.get(p.get, async (_: Request, res: Response) => {
 router.post(p.add,
   body('reserved_for_date_at').isDate().isAfter(new Date().toISOString()),
   body('ticket_type').isIn(['POVRATNA', 'U JEDNOM SMERU']),
-  body('passenger_name').isString(),
   body('is_paid').isBoolean().default(true).optional(),
   body('to_bus_line_station_id'),
   body('user_id'),
@@ -49,7 +65,7 @@ router.post(p.add,
     .if(body('to_bus_line_station_id').exists())
     .notEmpty()
     .custom((value, { req }) => value !== req.body.to_bus_line_station_id),
-  body('roud_trip_ticket_id').if(body('ticket_type').equals('POVRATNA')).notEmpty(),
+  body('reserved_roundtrip_at').if(body('ticket_type').equals('POVRATNA')).notEmpty(),
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);

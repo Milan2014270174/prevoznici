@@ -1,17 +1,17 @@
 import * as db from './database-connector';
 import { getRandomInt } from '@shared/functions';
 import { ITicket } from '../models/ticket-model';
-import { IStation } from '../models/station';
 import busLineStationRepo from './bus_line_station-repo';
-import stationRepo from './station-repo';
 import { IBusLine } from '../models/bus_line-model';
 import { IBusLineStation } from '../models/bus_line_station-model';
+import { ICity } from '../models/city-model';
+import cityRepo from './city-repo';
 
 
 const TABLE = 'ticket';
 
 /**
- * Get one company.
+ * Get one ticket.
  * 
  * @param email 
  * @returns 
@@ -20,9 +20,28 @@ async function getById(ticket_id: number): Promise<ITicket | null> {
   const { rows, fields } = (await db.query(
     `SELECT * FROM ${TABLE} WHERE ticket_id = ?`, [ticket_id]
   ));
-  const company = rows[0] as ITicket;
-  if (!company) null;
-  return company;
+  const ticket = rows[0] as ITicket;
+  if (!ticket) null;
+  return ticket;
+}
+
+/**
+ * Update one ticket.
+ * 
+ * @param ticket 
+ * @returns 
+ */
+async function update(ticket_id: number, update: ITicket) {
+  const query = `Update ${TABLE} SET ${Object.keys(update).map(key => `${key} = ?`).join(", ")} WHERE ticket_id = ?`;
+  const parameters = [...Object.values(update), ticket_id];
+  const { rows, result } = await db.query(query, parameters);
+
+  if (!result?.affectedRows) {
+
+    return null;
+  }
+
+  return rows;
 }
 
 /**
@@ -40,9 +59,14 @@ async function create(params: ITicket): Promise<ITicket | null> {
 
     return null;
   }
-  const company = await getById(result.insertId as number);
+  const ticket = await getById(result.insertId as number);
 
-  return company;
+  if (ticket) {
+
+    ticket.toStation = await loadCity(ticket.to_bus_line_station_id);
+    ticket.fromStation = await loadCity(ticket.from_bus_line_station_id);
+  }
+  return ticket;
 }
 
 
@@ -61,8 +85,8 @@ async function getAll(): Promise<ITicket[]> {
 
   for (const ticket of tickets) {
 
-    ticket.toStation = await loadBusStation(ticket.to_bus_line_station_id);
-    ticket.fromStation = await loadBusStation(ticket.from_bus_line_station_id);
+    ticket.toStation = await loadCity(ticket.to_bus_line_station_id);
+    ticket.fromStation = await loadCity(ticket.from_bus_line_station_id);
 
   }
 
@@ -81,7 +105,7 @@ async function getByBusLineId(buslineId: number, loadStations = false):
     `SELECT * FROM ${TABLE} 
     JOIN bus_line_station ON ticket.to_bus_line_station_id = bus_line_station.bus_line_station_id
     JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
-    WHERE ticket.bus_line_id = ${buslineId}
+    WHERE bus_line.bus_line_id = ${buslineId}
     ORDER BY arrives_at
     `
   ));
@@ -91,8 +115,8 @@ async function getByBusLineId(buslineId: number, loadStations = false):
   if (loadStations)
     for (const ticket of tickets) {
 
-      ticket.toStation = await loadBusStation(ticket.to_bus_line_station_id);
-      ticket.fromStation = await loadBusStation(ticket.from_bus_line_station_id);
+      ticket.toStation = await loadCity(ticket.to_bus_line_station_id);
+      ticket.fromStation = await loadCity(ticket.from_bus_line_station_id);
 
     }
 
@@ -121,16 +145,16 @@ async function getByUserId(userId: number, loadStations = false):
   if (loadStations)
     for (const ticket of tickets) {
 
-      ticket.toStation = await loadBusStation(ticket.to_bus_line_station_id);
-      ticket.fromStation = await loadBusStation(ticket.from_bus_line_station_id);
+      ticket.toStation = await loadCity(ticket.to_bus_line_station_id);
+      ticket.fromStation = await loadCity(ticket.from_bus_line_station_id);
 
     }
 
   return tickets;
 }
 
-async function loadBusStation(bus_line_station_id: number):
-  Promise<(IStation & { arrives_at: string, bus_line_station_type: string }) | null> {
+async function loadCity(bus_line_station_id: number):
+  Promise<(ICity & { arrives_at: string, bus_line_station_type: string }) | null> {
 
 
   const busLineStation = await busLineStationRepo.getById(bus_line_station_id);
@@ -139,13 +163,13 @@ async function loadBusStation(bus_line_station_id: number):
   if (!busLineStation) return null
 
   const station = {
-    ...(await stationRepo.getById(busLineStation.station_id)),
+    ...(await cityRepo.getById(busLineStation.station_id)),
     arrives_at: busLineStation.arrives_at,
     bus_line_station_type: busLineStation.bus_line_station_type
 
   };
 
-  return station as IStation & { arrives_at: string, bus_line_station_type: string };
+  return station as ICity & { arrives_at: string, bus_line_station_type: string };
 }
 
 
@@ -154,5 +178,6 @@ export default {
   getByUserId,
   getByBusLineId,
   getAll,
-  create
+  create,
+  update
 } as const;

@@ -11,7 +11,15 @@ import ticketService from './ticket-service';
  * @param busLineStation 
  * @returns 
  */
-function create(busLineStation: IBusLineStation) {
+async function create(busLineStation: IBusLineStation) {
+
+  const buslineStations = await busLineStationRepo.getByBusLineId(busLineStation.bus_line_id);
+
+  const stationType = busLineStation.bus_line_station_type;
+
+  if ((['POČETNO', 'KRAJNJE'].includes(stationType)) && buslineStations.find(bls => bls.bus_line_station_type == stationType))
+    throw new Error(`Ova linija već ima ${stationType.toLowerCase()} stajalište.`)
+
   return busLineStationRepo.create(busLineStation);
 }
 

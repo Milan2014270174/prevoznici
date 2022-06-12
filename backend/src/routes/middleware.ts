@@ -55,13 +55,16 @@ export async function adminMw(req: Request, res: Response, next: NextFunction) {
   try {
     // Get json-web-token
 
-    const jwt = req.headers.authorization?.substring(7, 9999)
+    const jwt = req.headers.authorization?.substring(7)
     if (!jwt) {
       throw Error(jwtNotPresentErr)
     }
+
     // Make sure user role is an admin
     console.log(jwt)
     const clientData = await jwtUtil.decode(jwt)
+    console.log(clientData)
+    console.log(typeof clientData)
     if (
       typeof clientData == "object" &&
       (clientData.role_id == 1 || clientData.role == 1)

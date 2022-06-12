@@ -71,10 +71,10 @@ router.post(p.register,
 
     // Check email and password present
     const user = req.body as IUser;
-    await authService.register(user.email, user.password, user.name)
+    const createdUser = await authService.register(user.email, user.password, user.name)
 
     // Add jwt to cookie
-    return res.status(OK).json(user);
+    return res.status(OK).json(createdUser);
   });
 
 

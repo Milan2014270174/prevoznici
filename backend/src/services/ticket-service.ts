@@ -24,6 +24,11 @@ function getUsersTickets(uid: number): Promise<ITicket[]> {
   return ticketRepo.getByUserId(uid, true);
 }
 
+async function update(ticketId: number, ticket: ITicket) {
+
+  await ticketRepo.update(ticketId, ticket);
+}
+
 
 /**
  * Add one ticket.
@@ -186,6 +191,53 @@ function getSeatCalculationsOnlyNumberOfFreeSeats(
   return seatCalculations;
 }
 
+async function createTicketDryRun(ticket:any) {
+  const busLineStationFrom = await busLineStationRepo.getById(ticket.from_bus_line_station_id);
+  const busLineStationTo = await busLineStationRepo.getById(ticket.to_bus_line_station_id);
+
+  if (!busLineStationFrom || !busLineStationTo)
+    throw new Error('Ne postoje ove stanice')
+
+  const busLineId = busLineStationFrom?.bus_line_id;
+  const busline = await busLineRepo.getById(busLineId);
+
+  const busLineTickets = await ticketRepo.getByBusLineId(busLineId, true)
+
+
+  if (!busline)
+    throw new Error('Ova linija ne postoji');
+
+  const allStationsOnLine = await busLineStationRepo.getByBusLineId(busLineId);
+
+  const seatCalculations = getSeatCalculations(allStationsOnLine, busline, busLineTickets);
+
+  if (
+    seatCalculations[ticket.from_bus_line_station_id].reservedSeatsNumber
+    > busline.available_seats - 1) {
+    throw new Error('Nema dovoljno mesta na ovoj stanici.');
+  }
+
+  ticket.seat_number = seatCalculations[ticket.from_bus_line_station_id].freeSeats[0];
+
+  const firstStation = allStationsOnLine.find(bls => bls.bus_line_station_type === 'POČETNO');
+  const lastStation = allStationsOnLine.find(bls => bls.bus_line_station_type === 'KRAJNJE');
+
+  if (!firstStation)
+    throw new Error('Ova linija nema pocetnu stanicu')
+
+  if (!lastStation)
+    throw new Error('Ova linija nema krajnju stanicu')
+
+  ticket.ticket_price = calculatePrice({
+    fromTime: busLineStationFrom.arrives_at,
+    toTime: busLineStationTo.arrives_at,
+    maxToTime: lastStation?.arrives_at,
+    maxFromTime: firstStation?.arrives_at,
+    fullPrice: busline.bus_line_price
+  })
+
+  return ticket.ticket_price;
+}
 
 
 
@@ -193,7 +245,9 @@ function getSeatCalculationsOnlyNumberOfFreeSeats(
 export default {
   // delete: deleteOne,
   getUsersTickets,
+  createTicketDryRun,
   getSeatCalculationsOnlyNumberOfFreeSeats,
   getAll,
   addOne,
+  update
 } as const;

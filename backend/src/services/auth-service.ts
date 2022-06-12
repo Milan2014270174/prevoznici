@@ -56,13 +56,25 @@ async function register(email: string, password: string, name: string): Promise<
     password: await bcrypt.hash(password, 10),
     name,
     token: salt,
-    role_id: 1
+    role_id: 2
   });
+
   if (!user) {
     throw new UnauthorizedError();
   }
 
-  return user;
+  const jwt = await jwtUtil.sign({
+    id: user.user_id,
+    email: user.name,
+    name: user.name,
+    role_id: user.role_id,
+    token: user.token
+  })
+
+  return {
+    ...user,
+    token: jwt
+  };
 }
 
 
