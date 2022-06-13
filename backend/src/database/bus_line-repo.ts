@@ -75,17 +75,56 @@ async function create(params: IBusLine): Promise<IBusLine | null> {
 async function getAll(): Promise<IBusLine[]> {
 
   const { rows, fields } = (await db.query(
-    `SELECT * FROM ${TABLE} ${JOIN_TABLES.COMPANY}`
+    `SELECT * FROM ${TABLE} ${JOIN_TABLES.COMPANY}
+     JOIN bus_line_station bls ON bls.bus_line_id = bus_line.bus_line_id
+     JOIN city ON bls.city_id = city.city_id
+     WHERE bls.bus_line_station_type = 'POČETNO' OR
+     bls.bus_line_station_type = 'KRAJNJE'
+    `
   ));
 
-  const bus_lines = rows as IBusLine[];
+
+
+  const bus_lines = rows as (IBusLine & IBusLineStation)[];
+
+  console.log(bus_lines);
+
+  const toReturn = [] as any[];
+
+
+  for (let index = 0; index < bus_lines.length; index++) {
+    const element = bus_lines[index];
+
+    const indexInNewArray = toReturn.findIndex((tr: any) => tr.bus_line_id == element.bus_line_id);
+
+    if (indexInNewArray == -1) {
+      const newLength = toReturn.push(element);
+
+      toReturn[newLength - 1][element.bus_line_station_type] = {
+        city_name: element.city_name,
+        arrives_at: element.arrives_at,
+        bus_line_station_id: element.bus_line_station_id,
+        city_id: element.city_id
+      };
+    } else {
+
+      toReturn[indexInNewArray][element.bus_line_station_type] = {
+        city_name: element.city_name,
+        arrives_at: element.arrives_at,
+        bus_line_station_id: element.bus_line_station_id,
+        city_id: element.city_id
+      };
+    }
+
+  }
+
 
   // for (const busLine of bus_lines) {
 
   //   busLine.stations = await loadStations(busLine.bus_line_id as number);
   // }
 
-  return bus_lines;
+  return toReturn;
 }
 
 

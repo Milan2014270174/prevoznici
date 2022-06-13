@@ -1,7 +1,7 @@
 import StatusCodes from 'http-status-codes';
 import { Request, Response, Router } from 'express';
 import busLineStationService from '../../services/bus-line-station-service';
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
 import { IBusLineStation } from '../../models/bus_line_station-model';
@@ -23,11 +23,11 @@ export const p = {
 
 
 router.get(p.get,
-  body('bus_line_id').isNumeric(),
+  query('bus_line_id').notEmpty(),
   async (req: Request, res: Response) => {
 
     return res.status(OK).json({
-      busLineStations: await busLineStationService.getByBusLineId(req.body.bus_line_id as number)
+      busLineStations: await busLineStationService.getByBusLineId(req.query.bus_line_id as any)
     })
   })
 
