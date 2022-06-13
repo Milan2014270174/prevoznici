@@ -13,6 +13,7 @@ import userMeRouter from './user/user-me-router';
 import busLineRouter from './public/bus-line-router';
 import busLineStationRouter from './public/bus-line-station-router';
 import companyRouter from './public/company-router';
+import cityRouter from './public/cities-router';
 import ticketRouter from './public/ticket-router';
 
 
@@ -36,6 +37,7 @@ apiRouter.use('/bus-lines', busLineRouter);
 apiRouter.use('/tickets', ticketRouter);
 apiRouter.use('/bus-line-stations', busLineStationRouter);
 apiRouter.use('/companies', companyRouter);
+apiRouter.use('/cities', cityRouter);
 apiRouter.use('/auth', authRouter);
 
 // Export default
