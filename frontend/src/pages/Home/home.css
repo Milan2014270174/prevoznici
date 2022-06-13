@@ -9,3 +9,9 @@
 .hero h1 {
   width: 50%;
 }
+
+@media only screen and (max-width: 599px) {
+  .search-column {
+    text-align: center;
+  }
+}

@@ -1,15 +1,11 @@
 import React from "react"
-import { useAuthState } from "../../context/authentication"
 
-interface ModalProps {
-  modal: {}
+interface ReservationModalProps {
+  title: string
   closeModal: () => any
-  submitModal: () => any
 }
 
-const Modal = ({ modal, closeModal, submitModal }: ModalProps) => {
-  const user = useAuthState()
-
+const ReservationModal = ({ title, closeModal }: ReservationModalProps) => {
   return (
     <div
       className="modal fade show"
@@ -21,7 +17,7 @@ const Modal = ({ modal, closeModal, submitModal }: ModalProps) => {
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">Modal title</h5>
+            <h5 className="modal-title">{title}</h5>
             <button
               type="button"
               className="btn-close"
@@ -30,13 +26,8 @@ const Modal = ({ modal, closeModal, submitModal }: ModalProps) => {
               onClick={() => closeModal()}
             ></button>
           </div>
-          {user.token ? (
-            <div className="modal-body">
-              <p>Modal body text goes here.</p>
-            </div>
-          ) : (
-            <div>Login</div>
-          )}
+
+          <div className="modal-body">Reserve</div>
           <div className="modal-footer">
             <button
               type="button"
@@ -46,13 +37,10 @@ const Modal = ({ modal, closeModal, submitModal }: ModalProps) => {
             >
               Otkaži
             </button>
-            {user.token ? (
-              <button type="button" className="btn btn-primary">
-                Save changes
-              </button>
-            ) : (
-              ""
-            )}
+
+            <button type="button" className="btn btn-primary">
+              Rezerviši
+            </button>
           </div>
         </div>
       </div>
@@ -60,4 +48,4 @@ const Modal = ({ modal, closeModal, submitModal }: ModalProps) => {
   )
 }
 
-export default Modal
+export default ReservationModal

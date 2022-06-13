@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import "./login.css"
 import axiosClient from "../../axios/axiosClient"
 import { useAuthDispatch, useAuthState } from "../../context/authentication"
@@ -6,7 +7,6 @@ import { setToken } from "../../axios/axiosClient"
 
 const Login = () => {
   const dispatch = useAuthDispatch()
-  const user = useAuthState()
 
   const [input, setInput] = useState({
     email: "",
@@ -38,16 +38,19 @@ const Login = () => {
           localStorage.setItem("prevozniciJWT", token)
           setToken()
           axiosClient
-            .get("/user")
+            .get("/user/me")
             .then((res) => {
-              console.log(res.data)
+              console.log("token", token)
               dispatch({
                 type: "HANDLE_LOGIN",
-                payload: { token: res.data.token }
+                payload: {
+                  user: res.data.clientData,
+                  token: token
+                }
               })
             })
             .catch((err) => {
-              console.log("/user error", err)
+              console.log(err)
             })
         })
         .catch((err) => {
@@ -113,7 +116,7 @@ const Login = () => {
         </form>
         <p className="fw-light">
           Ukoliko nemate nalog, registrujte se klikom na link{" "}
-          <a href="/registracija">Registracija</a>
+          <Link to="/registracija">Registracija</Link>
         </p>
       </div>
     </div>

@@ -2,13 +2,16 @@ import { useState } from "react"
 import { useAuthDispatch, useAuthState } from "../../context/authentication"
 import "./navbar.css"
 import { NavLink } from "react-router-dom"
+import { User } from "../../reducers/authentication"
 
 const Navbar = () => {
   const dispatch = useAuthDispatch()
 
-  const user = useAuthState()
+  const user: User | any = useAuthState().user
 
   const [menu, setMenu] = useState(false)
+
+  const [userSubmenu, setUserSubmenu] = useState(false)
 
   function openMenu() {
     setMenu(!menu)
@@ -81,18 +84,22 @@ const Navbar = () => {
                 Prevoznici
               </NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink
-                className={({ isActive }) =>
-                  `nav-link active ${isActive ? "active" : ""}`
-                }
-                aria-current="page"
-                to="/rezervacije"
-              >
-                Rezervacije
-              </NavLink>
-            </li>
-            {Object.keys(user.user).length === 0 ? (
+            {Object.keys(user).length > 0 && user.role_id === 1 ? (
+              <li className="nav-item">
+                <NavLink
+                  className={({ isActive }) =>
+                    `nav-link active ${isActive ? "active" : ""}`
+                  }
+                  aria-current="page"
+                  to="/rezervacije"
+                >
+                  Rezervacije
+                </NavLink>
+              </li>
+            ) : (
+              ""
+            )}
+            {Object.keys(user).length === 0 ? (
               <li className="nav-item">
                 <NavLink
                   className={({ isActive }) =>
@@ -108,11 +115,31 @@ const Navbar = () => {
               ""
             )}
 
-            {Object.keys(user.user).length > 0 ? (
-              <li className="nav-item">
-                <p className="nav-link text-link" onClick={() => logout()}>
-                  Logout
+            {Object.keys(user).length > 0 ? (
+              <li className="nav-item dropdown">
+                <p
+                  className="nav-link text-link dropdown-toggle"
+                  id="navbarDropdownMenuLink"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  onClick={() => setUserSubmenu(!userSubmenu)}
+                >
+                  {user.name}
                 </p>
+                <ul
+                  className={`dropdown-menu ${userSubmenu ? "show" : ""}`}
+                  aria-labelledby="navbarDropdownMenuLink"
+                >
+                  <li>
+                    <p
+                      className="dropdown-item text-link"
+                      onClick={() => logout()}
+                    >
+                      Logout
+                    </p>
+                  </li>
+                </ul>
               </li>
             ) : (
               ""

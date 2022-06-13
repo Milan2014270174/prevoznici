@@ -3,6 +3,7 @@ import { useAuthDispatch, useAuthState } from "./context/authentication"
 import "./App.css"
 import { Routes, Route } from "react-router-dom"
 import PublicRoute from "./routes/publicRoute/PublicRoute"
+import AdminRoute from "./routes/adminRoute/AdminRoute"
 import Login from "./pages/Login/Login"
 import Home from "./pages/Home/Home"
 import AppWrapper from "./components/AppWrapper/AppWrapper"
@@ -12,25 +13,28 @@ import Reservations from "./pages/Reservations/Reservations"
 import Prevoznici from "./pages/Prevoznici/Prevoznici"
 import axiosClient from "./axios/axiosClient"
 
+import { User } from "./reducers/authentication"
+
 function App() {
   const dispatch = useAuthDispatch()
   const [loading, setLoading] = useState(true)
-  const user = useAuthState()
+  const auth = useAuthState()
+  const user: User | any = useAuthState().user
   const [loggedIn, setLoggedIn] = useState(false)
 
   useEffect(() => {
-    console.log(user.loading)
-    if (loggedIn && user.user) {
+    console.log("auth change", auth)
+    if (loggedIn && Object.keys(auth.user).length > 0) {
       setLoading(false)
       return
-    } else if (user.token && !loggedIn) {
+    } else if (auth.token && !loggedIn) {
       console.log("uzmi korisnika")
       axiosClient
         .get("/user/me")
         .then((res) => {
           dispatch({
             type: "HANDLE_LOGIN",
-            payload: { user: res.data.clientData, auth_token: user.token }
+            payload: { user: res.data.clientData, token: auth.token }
           })
           setLoggedIn(true)
         })
@@ -41,10 +45,15 @@ function App() {
       setLoggedIn(false)
     }
     setLoading(false)
-  }, [user])
+  }, [auth])
+
+  useEffect(() => {
+    console.log("logged in", loggedIn)
+  }, [loggedIn])
+
   return (
     <div className="App">
-      {loading || user.loading ? (
+      {loading || auth.loading ? (
         <div className="fixed-center">
           <Loading />
         </div>
@@ -67,21 +76,14 @@ function App() {
                 />
               }
             />
-            <Route
-              path="/prevoznici"
-              element={
-                <PublicRoute
-                  Component={<Prevoznici />}
-                  isAuthenticated={loggedIn}
-                />
-              }
-            />
+            <Route path="/prevoznici" element={<Prevoznici />} />
             <Route
               path="/rezervacije"
               element={
-                <PublicRoute
+                <AdminRoute
                   Component={<Reservations />}
                   isAuthenticated={loggedIn}
+                  isAdmin={loggedIn && user.role_id === 1 ? true : false}
                 />
               }
             />

@@ -6,8 +6,25 @@
   background-color: white;
   color: black;
 }
+
+.accordion-button {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  transition: padding 150ms;
+}
+.accordion-button.no-icon::after {
+  display: none;
+}
+.accordion-button.collapsed {
+  padding-top: 25px;
+  padding-bottom: 25px;
+}
+.accordion-button:hover {
+  background-color: rgba(241, 254, 255, 0.827);
+}
+
 .accordion-item {
   border-left: 0px;
   border-right: 0px;
-  border-color: black;
+  border-color: #ccc;
 }

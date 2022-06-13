@@ -3,9 +3,20 @@ import "./home.css"
 import Accordion from "../../components/Accordion/Accordion"
 import PlannedLine from "../../components/PlannedLine/PlannedLine"
 import axiosClient from "../../axios/axiosClient"
-import Modal from "../../components/Modal/Modal"
+import Modal from "../../components/modals/Modal/Modal"
+import { useAuthState } from "../../context/authentication"
+import { User } from "../../reducers/authentication"
+import { Link } from "react-router-dom"
+import ReservationModal from "../../components/modals/ReservationModal/ReservationModal"
+import NewLineModal from "../../components/modals/NewLineModal/NewLineModal"
 
 const today = new Date()
+
+type PlannedLine = {
+  bus_line_id: number
+  company_name: string
+  available_seats: number
+}
 
 function todaysDate() {
   var date = today.getDate()
@@ -19,11 +30,6 @@ function todaysDate() {
   )
 }
 
-const initReservationModal = {
-  show: false,
-  id: ""
-}
-
 const Home = () => {
   const [input, setInput] = useState({
     companies: "",
@@ -31,12 +37,18 @@ const Home = () => {
     endDestination: "",
     date: todaysDate()
   })
-  const [items, setItems] = useState([])
+
+  const user: User | any = useAuthState().user
+
+  const [plannedLines, setPlannedLines] = useState([])
+
+  const [companies, setCompanies] = useState([])
+  const [cities, setCities] = useState([])
   const [loading, setLoading] = useState(true)
-  const [reservationModal, setReservationModal] = useState({
-    show: false,
-    id: ""
-  })
+
+  // Modali
+  const [reservationModal, setReservationModal] = useState(false)
+  const [authModal, setAuthModal] = useState(false)
   const [newLineModal, setNewLineModal] = useState(false)
 
   function handleInputChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -47,22 +59,53 @@ const Home = () => {
   }
 
   function openReservationModal(id: string) {
-    console.log(id)
-    setReservationModal({
-      show: true,
-      id: id
-    })
+    console.log("make reservation", id)
+    setReservationModal(true)
   }
   function closeReservationModal() {
-    setReservationModal(initReservationModal)
+    setReservationModal(false)
   }
-  function submitReservationModal() {
-    console.log("submit")
+  function closeAuthModal() {
+    setAuthModal(false)
+  }
+
+  function getPlannedLineDetails(id: number) {
+    console.log("details", id)
+    // axiosClient
+    //   .get(`/bus-line-stations/all?bus_line_id=${id}`)
+    //   .then((res) => {
+    //     console.log(res.data)
+    //   })
+    //   .then((err) => {
+    //     console.log(err)
+    //   })
   }
 
   useEffect(() => {
-    console.log("search")
+    console.log("input", input)
   }, [input])
+
+  useEffect(() => {
+    // not iterable
+    axiosClient
+      .get("/bus-lines/all")
+      .then((res) => {
+        console.log("bus lines", res.data)
+        setPlannedLines(res.data.busLines)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+    axiosClient.get("/companies/all").then((res) => {
+      console.log("companies", res.data)
+      setCompanies(res.data.companys)
+    })
+    axiosClient.get("/cities/all").then((res) => {
+      console.log("cities", res.data)
+      setCities(res.data.companys)
+    })
+  }, [])
 
   return (
     <div className="home-page">
@@ -75,7 +118,7 @@ const Home = () => {
       <div className="container py-5">
         <div className="search-wrapper">
           <div className="row col-12">
-            <div className="col col-6 col-md-3">
+            <div className="search-column mb-2 col-12 col-sm-6 col-md-3">
               <label htmlFor="companies">Pretraga</label>
               <select
                 id="companies"
@@ -86,11 +129,21 @@ const Home = () => {
                 placeholder="Prevoznici"
               >
                 <option value="">Izaberi prevoznika</option>
-                <option value="SingiBus">SingiBus</option>
-                <option>BlablaBus</option>
+                {companies
+                  ? companies.map((company: any) => {
+                      return (
+                        <option
+                          key={company.company_id}
+                          value={company.company_name}
+                        >
+                          {company.company_name}
+                        </option>
+                      )
+                    })
+                  : ""}
               </select>
             </div>
-            <div className="col col-6 col-md-3">
+            <div className="search-column mb-2 col-12 col-sm-6 col-md-3">
               <label htmlFor="startDestination">Mesto polaska</label>
               <select
                 name="startDestination"
@@ -101,12 +154,18 @@ const Home = () => {
                 onChange={handleInputChange}
               >
                 <option value="">Izaberi mesto polaska</option>
-                <option>Beograd</option>
-                <option>Niš</option>
-                <option>Novi Sad</option>
+                {cities
+                  ? cities.map((city: any) => {
+                      return (
+                        <option key={city.city_id} value={city.city_name}>
+                          {city.city_name}
+                        </option>
+                      )
+                    })
+                  : ""}
               </select>
             </div>
-            <div className="col col-6 col-md-3">
+            <div className="search-column mb-2 col-12 col-sm-6 col-md-3">
               <label htmlFor="endDestination">Mesto dolaska</label>
               <select
                 name="endDestination"
@@ -116,13 +175,18 @@ const Home = () => {
                 onChange={handleInputChange}
               >
                 <option value="">Izaberi mesto dolaska</option>
-
-                <option>Beograd</option>
-                <option>Niš</option>
-                <option>Novi Sad</option>
+                {cities
+                  ? cities.map((city: any) => {
+                      return (
+                        <option key={city.city_id} value={city.city_name}>
+                          {city.city_name}
+                        </option>
+                      )
+                    })
+                  : ""}
               </select>
             </div>
-            <div className="col col-6 col-md-3">
+            <div className="search-column mb-2 col-12 col-sm-6 col-md-3">
               <label htmlFor="date">Datum polaska</label>
               <input
                 id="date"
@@ -137,56 +201,95 @@ const Home = () => {
         </div>
         <h3 className="subtitle my-5">{input.date}</h3>
         <div className="item-list my-5">
-          <Accordion
-            header={
-              <PlannedLine.Header
-                company=""
-                startDestination=""
-                endDestination=""
-                startTime=""
-                endTime=""
+          {plannedLines.map((plannedLine: PlannedLine, i) => {
+            return (
+              <Accordion
+                key={i}
+                id={plannedLine.bus_line_id}
+                onCollapse={getPlannedLineDetails}
+                header={
+                  <PlannedLine.Header
+                    company={plannedLine.company_name}
+                    seats={plannedLine.available_seats}
+                    startDestination=""
+                    endDestination=""
+                    startTime=""
+                    endTime=""
+                  />
+                }
+                body={
+                  <PlannedLine.Body
+                    seats={plannedLine.available_seats}
+                    seatsTotal={0}
+                    destinations={[]}
+                    price=""
+                    priceBack=""
+                    openModal={openReservationModal}
+                  />
+                }
               />
-            }
-            body={
-              <PlannedLine.Body
-                seats={0}
-                seatsTotal={0}
-                destinations={[]}
-                price=""
-                priceBack=""
-                openModal={openReservationModal}
-              />
-            }
-          />
-          <Accordion
-            header={
-              <PlannedLine.Header
-                company=""
-                startDestination=""
-                endDestination=""
-                startTime=""
-                endTime=""
-              />
-            }
-            body={
-              <PlannedLine.Body
-                seats={0}
-                seatsTotal={0}
-                destinations={[]}
-                price=""
-                priceBack=""
-                openModal={openReservationModal}
-              />
-            }
-          />
+            )
+          })}
         </div>
       </div>
-      {reservationModal.show ? (
-        <Modal
-          modal={reservationModal}
-          closeModal={closeReservationModal}
-          submitModal={submitReservationModal}
-        />
+      {reservationModal ? (
+        Object.keys(user).length > 0 ? (
+          <ReservationModal
+            title={"Rezervisi kartu"}
+            closeModal={closeReservationModal}
+          />
+        ) : (
+          <Modal
+            title={"Rezervisi kartu"}
+            body={
+              <>
+                <div className="mb-3">
+                  <h4 className="mb-2">
+                    Morate se ulogovati da biste rezervisali kartu.
+                  </h4>
+
+                  <Link to="/login">
+                    <button type="button" className="btn btn-primary">
+                      Login
+                    </button>
+                  </Link>
+                </div>
+                <div className="mb-3">
+                  <h4 className="mb-2">
+                    Ili se registrujte ukoliko nemate nalog
+                  </h4>
+
+                  <Link to="/registracija">
+                    <button type="button" className="btn btn-primary">
+                      Registracija
+                    </button>
+                  </Link>
+                </div>
+              </>
+            }
+            closeModal={closeReservationModal}
+          />
+        )
+      ) : (
+        ""
+      )}
+      {Object.keys(user).length > 0 && user.role_id === 1 ? (
+        <>
+          <div
+            className="add-new-button btn-primary"
+            onClick={() => setNewLineModal(true)}
+          >
+            <i className="fa-solid fa-plus"></i>
+          </div>
+          {newLineModal ? (
+            <NewLineModal
+              title={"Dodaj planiranu liniju"}
+              closeModal={() => setNewLineModal(false)}
+            ></NewLineModal>
+          ) : (
+            ""
+          )}
+        </>
       ) : (
         ""
       )}

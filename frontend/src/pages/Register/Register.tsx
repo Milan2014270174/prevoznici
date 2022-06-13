@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import "./register.css"
 import axiosClient from "../../axios/axiosClient"
 import { useAuthDispatch } from "../../context/authentication"
 
 const Register = () => {
+  const dispatch = useAuthDispatch()
+
   const [input, setInput] = useState({
     name: "",
     email: "",
@@ -36,6 +39,14 @@ const Register = () => {
         })
         .then((res) => {
           console.log(res.data)
+          localStorage.setItem("prevozniciJWT", res.data.clientData.token)
+          dispatch({
+            type: "HANDLE_LOGIN",
+            payload: {
+              user: res.data.clientData,
+              token: res.data.clientData.token
+            }
+          })
         })
         .catch((err) => {
           console.log("err", err)
@@ -123,7 +134,7 @@ const Register = () => {
         </form>
         <p className="fw-light">
           Ukoliko imate nalog, ulogujte se klikom na link{" "}
-          <a href="/login">Login</a>
+          <Link to="/login">Login</Link>
         </p>
       </div>
     </div>

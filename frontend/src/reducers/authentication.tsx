@@ -4,8 +4,15 @@ import React, { useReducer } from "react"
 
 let token = localStorage.getItem("prevozniciJWT")
 
+export type User = {
+  id: number
+  name: string
+  email: string
+  role_id: number
+}
+
 type AuthType = {
-  user: {}
+  user: User | {}
   token: string
   loading: boolean
   errorMessage: string
@@ -34,10 +41,11 @@ export const AuthReducer = (initialState: AuthType, action: ActionType) => {
       return {
         ...initialState,
         user: action.payload.user,
-        token: action.payload.auth_token,
+        token: action.payload.token,
         loading: false
       }
     case "LOGOUT":
+      localStorage.removeItem("prevozniciJWT")
       return {
         ...initialState,
         loading: false,
