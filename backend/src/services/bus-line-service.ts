@@ -1,6 +1,8 @@
 import busLineRepo from '../database/bus_line-repo';
+import busLineStationRepo from '../database/bus_line_station-repo';
 import { UserNotFoundError } from '@shared/errors';
 import { IBusLine } from '../models/bus_line-model';
+import { IBusLineStation } from '../models/bus_line_station-model';
 
 
 
@@ -20,21 +22,38 @@ function getAll(): Promise<IBusLine[]> {
  * @param busLine 
  * @returns 
  */
-function create(busLine: IBusLine) {
-  return busLineRepo.create(busLine);
+async function create(busLine: IBusLine, stations: IBusLineStation[]) {
+
+  const insertedBusLine = await busLineRepo.create(busLine);
+
+  if (!insertedBusLine) throw new Error('Greška prilikom unosa linije.');
+
+  const modifiedStations = stations.map(station => ({
+    ...station,
+    bus_line_id: insertedBusLine.bus_line_id as number
+  }))
+
+  await busLineStationRepo.createMany(modifiedStations);
+
+
+  return insertedBusLine;
 }
 
 
-// /**
-//  * Update one busLine.
-//  * 
-//  * @param busLine 
-//  * @returns 
-//  */
-// async function updateOne(busLine: IBusLine): Promise<void> {
+/**
+ * Update one busLine.
+ * 
+ * @param busLine 
+ * @returns 
+ */
+async function updateOne(busLine: IBusLine, stations: IBusLineStation[]): Promise<void> {
 
-//   return busLineRepo.update(busLine);
-// }
+  await busLineRepo.update(busLine.bus_line_id as number, busLine);
+
+  stations.forEach(station => {
+    busLineStationRepo.update(station.bus_line_station_id, station)
+  });
+}
 
 
 // /**
@@ -56,6 +75,6 @@ function create(busLine: IBusLine) {
 export default {
   getAll,
   create,
-  // updateOne,
+  updateOne,
   // delete: deleteOne,
 } as const;

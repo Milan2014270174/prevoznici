@@ -150,9 +150,31 @@ async function loadStations(bus_line_id: number):
   return stations;
 }
 
+/**
+ * Update one busLine.
+ * 
+ * @param bus_line_id 
+ * @param busLine 
+ * @returns 
+ */
+async function update(bus_line_id: number, update: IBusLine) {
+  const query = `Update ${TABLE} SET ${Object.keys(update).map(key => `${key} = ?`).join(", ")} WHERE bus_line_id = ?`;
+  const parameters = [...Object.values(update), bus_line_id];
+  const { rows, result } = await db.query(query, parameters);
+
+  if (!result?.affectedRows) {
+
+    return null;
+  }
+
+  return rows;
+}
+
+
 // Export default
 export default {
   getById,
   getAll,
+  update,
   create
 } as const;
