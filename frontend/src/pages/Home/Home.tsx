@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import "./home.css"
-import Accordion from "../../components/Accordion/Accordion"
 import PlannedLine from "../../components/PlannedLine/PlannedLine"
 import axiosClient from "../../axios/axiosClient"
 import Modal from "../../components/modals/Modal/Modal"
@@ -12,10 +11,19 @@ import NewLineModal from "../../components/modals/NewLineModal/NewLineModal"
 
 const today = new Date()
 
-type PlannedLine = {
+export type DestinationType = {
+  arrives_at: string
+  bus_line_station_id: number
+  city_id: number
+  city_name: string
+}
+
+type PlannedLineType = {
   bus_line_id: number
   company_name: string
   available_seats: number
+  POČETNO: DestinationType | any
+  KRAJNJE: DestinationType | any
 }
 
 function todaysDate() {
@@ -40,7 +48,7 @@ const Home = () => {
 
   const user: User | any = useAuthState().user
 
-  const [plannedLines, setPlannedLines] = useState([])
+  const [plannedLines, setPlannedLines] = useState<PlannedLineType[]>([])
 
   const [companies, setCompanies] = useState([])
   const [cities, setCities] = useState([])
@@ -58,7 +66,7 @@ const Home = () => {
     setInput({ ...input, [event.target.name]: event.target.value })
   }
 
-  function openReservationModal(id: string) {
+  function openReservationModal(id: number) {
     console.log("make reservation", id)
     setReservationModal(true)
   }
@@ -67,18 +75,6 @@ const Home = () => {
   }
   function closeAuthModal() {
     setAuthModal(false)
-  }
-
-  function getPlannedLineDetails(id: number) {
-    console.log("details", id)
-    // axiosClient
-    //   .get(`/bus-line-stations/all?bus_line_id=${id}`)
-    //   .then((res) => {
-    //     console.log(res.data)
-    //   })
-    //   .then((err) => {
-    //     console.log(err)
-    //   })
   }
 
   useEffect(() => {
@@ -201,32 +197,27 @@ const Home = () => {
         </div>
         <h3 className="subtitle my-5">{input.date}</h3>
         <div className="item-list my-5">
-          {plannedLines.map((plannedLine: PlannedLine, i) => {
+          {plannedLines.map((plannedLine: PlannedLineType, i) => {
             return (
-              <Accordion
+              <PlannedLine
                 key={i}
                 id={plannedLine.bus_line_id}
-                onCollapse={getPlannedLineDetails}
-                header={
-                  <PlannedLine.Header
-                    company={plannedLine.company_name}
-                    seats={plannedLine.available_seats}
-                    startDestination=""
-                    endDestination=""
-                    startTime=""
-                    endTime=""
-                  />
+                company={plannedLine.company_name}
+                seats={plannedLine.available_seats}
+                seatsTotal={0}
+                startDestination={
+                  plannedLine.POČETNO ? plannedLine.POČETNO.city_name : ""
                 }
-                body={
-                  <PlannedLine.Body
-                    seats={plannedLine.available_seats}
-                    seatsTotal={0}
-                    destinations={[]}
-                    price=""
-                    priceBack=""
-                    openModal={openReservationModal}
-                  />
+                endDestination={
+                  plannedLine.KRAJNJE ? plannedLine.KRAJNJE.city_name : ""
                 }
+                startTime={
+                  plannedLine.POČETNO ? plannedLine.POČETNO.arrives_at : ""
+                }
+                endTime={
+                  plannedLine.KRAJNJE ? plannedLine.KRAJNJE.arrives_at : ""
+                }
+                openModal={openReservationModal}
               />
             )
           })}
@@ -243,8 +234,8 @@ const Home = () => {
             title={"Rezervisi kartu"}
             body={
               <>
-                <div className="mb-3">
-                  <h4 className="mb-2">
+                <div className="mb-3 d-flex flex-column align-items-center">
+                  <h4 className="mb-2 text-center">
                     Morate se ulogovati da biste rezervisali kartu.
                   </h4>
 
@@ -254,8 +245,8 @@ const Home = () => {
                     </button>
                   </Link>
                 </div>
-                <div className="mb-3">
-                  <h4 className="mb-2">
+                <div className="mb-3 d-flex flex-column align-items-center">
+                  <h4 className="mb-2 text-center">
                     Ili se registrujte ukoliko nemate nalog
                   </h4>
 

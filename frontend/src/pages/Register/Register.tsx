@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import "./register.css"
 import axiosClient from "../../axios/axiosClient"
-import { useAuthDispatch } from "../../context/authentication"
+import { useAuthDispatch, useAuthState } from "../../context/authentication"
 
 const Register = () => {
   const dispatch = useAuthDispatch()
+
+  const error = useAuthState().errorMessage
 
   const [input, setInput] = useState({
     name: "",
@@ -39,17 +41,21 @@ const Register = () => {
         })
         .then((res) => {
           console.log(res.data)
-          localStorage.setItem("prevozniciJWT", res.data.clientData.token)
+          localStorage.setItem("prevozniciJWT", res.data.token)
           dispatch({
             type: "HANDLE_LOGIN",
             payload: {
-              user: res.data.clientData,
-              token: res.data.clientData.token
+              user: res.data,
+              token: res.data.token
             }
           })
         })
         .catch((err) => {
           console.log("err", err)
+          dispatch({
+            type: "LOGIN_ERROR",
+            payload: err.response.data.error || "Email nije validan."
+          })
         })
     }
   }
@@ -127,7 +133,15 @@ const Register = () => {
               ""
             )}
           </div>
-
+          {error.length > 0 ? (
+            <div className="mb-3">
+              <div className="invalid-feedback" style={{ display: "unset" }}>
+                {error}
+              </div>
+            </div>
+          ) : (
+            ""
+          )}
           <button type="submit" className="btn btn-primary">
             Registrujte se
           </button>

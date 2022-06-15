@@ -7,24 +7,34 @@
   color: black;
 }
 
-.accordion-button {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  transition: padding 150ms;
+.accordion-button.show {
+  padding-top: 25px;
+  padding-bottom: 25px;
+  border-top: 2px solid black;
 }
 .accordion-button.no-icon::after {
   display: none;
 }
 .accordion-button.collapsed {
-  padding-top: 25px;
-  padding-bottom: 25px;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  transition: padding 150ms;
 }
 .accordion-button:hover {
   background-color: rgba(241, 254, 255, 0.827);
 }
 
 .accordion-item {
+  border: 1px solid #ccc;
+  position: relative;
   border-left: 0px;
   border-right: 0px;
-  border-color: #ccc;
+  transition: all 250ms;
+  border-radius: 0;
+}
+.accordion-item.show {
+  border-bottom: 2px #000 solid;
+  transform: scale(101%);
+  z-index: 1000;
+  transition: all 250ms;
 }

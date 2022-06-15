@@ -40,3 +40,8 @@ label {
 .add-new-button i {
   font-size: 40px;
 }
+
+.info-text {
+  font-weight: bold;
+  color: #0b5ed7;
+}

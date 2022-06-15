@@ -1,6 +1,7 @@
 //
 
 import React, { useReducer } from "react"
+import { setToken } from "../axios/axiosClient"
 
 let token = localStorage.getItem("prevozniciJWT")
 
@@ -38,6 +39,7 @@ export const AuthReducer = (initialState: AuthType, action: ActionType) => {
         loading: true
       }
     case "HANDLE_LOGIN":
+      setToken()
       return {
         ...initialState,
         user: action.payload.user,
