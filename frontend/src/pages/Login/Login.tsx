@@ -8,6 +8,8 @@ import { setToken } from "../../axios/axiosClient"
 const Login = () => {
   const dispatch = useAuthDispatch()
 
+  const error = useAuthState().errorMessage
+
   const [input, setInput] = useState({
     email: "",
     password: "",
@@ -55,6 +57,10 @@ const Login = () => {
         })
         .catch((err) => {
           console.log("err", err)
+          dispatch({
+            type: "LOGIN_ERROR",
+            payload: "Email ili lozinka nisu ispravni."
+          })
         })
     }
   }
@@ -110,6 +116,15 @@ const Login = () => {
             )}
           </div>
 
+          {error.length > 0 ? (
+            <div className="mb-3">
+              <div className="invalid-feedback" style={{ display: "unset" }}>
+                {error}
+              </div>
+            </div>
+          ) : (
+            ""
+          )}
           <button type="submit" className="btn btn-primary">
             Login
           </button>

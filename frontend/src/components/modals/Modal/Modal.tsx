@@ -40,15 +40,8 @@ const Modal = ({ title, body, closeModal }: ModalProps) => {
               data-bs-dismiss="modal"
               onClick={() => closeModal()}
             >
-              Otkaži
+              Ok
             </button>
-            {user ? (
-              <button type="button" className="btn btn-primary">
-                Save changes
-              </button>
-            ) : (
-              ""
-            )}
           </div>
         </div>
       </div>

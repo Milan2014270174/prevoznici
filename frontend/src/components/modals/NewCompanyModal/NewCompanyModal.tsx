@@ -1,20 +1,25 @@
 import React, { useState } from "react"
+import axiosClient from "../../../axios/axiosClient"
 import "./new-company-modal.css"
 
 interface ModalProps {
   title: string
   closeModal: () => any
+  submitModal: (params: string) => any
 }
 
-const NewCompanyModal = ({ title, closeModal }: ModalProps) => {
+const NewCompanyModal = ({ title, closeModal, submitModal }: ModalProps) => {
   const [name, setName] = useState("")
+  const [success, setSuccess] = useState(false)
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     setName(event.target.value)
   }
 
   function submit() {
-    console.log("submit")
+    if (name && name.length > 0) {
+      submitModal(name)
+    }
   }
 
   return (

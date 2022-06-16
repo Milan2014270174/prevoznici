@@ -22,10 +22,10 @@ const Accordion = ({ header, body, onCollapse, id }: AccordionProps) => {
   }, [collapsed])
 
   return (
-    <div className="accordion-item">
+    <div className={`accordion-item ${collapsed ? "show" : ""}`}>
       <h2 className="accordion-header" id="headingOne">
         <button
-          className={`accordion-button ${collapsed ? "" : "collapsed"} ${
+          className={`accordion-button ${collapsed ? "show" : "collapsed"} ${
             body === "" ? "no-icon" : ""
           }`}
           type="button"

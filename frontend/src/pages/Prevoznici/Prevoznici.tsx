@@ -6,20 +6,55 @@ import { useAuthState } from "../../context/authentication"
 import { User } from "../../reducers/authentication"
 import NewCompanyModal from "../../components/modals/NewCompanyModal/NewCompanyModal"
 
-type Company = {
+type CompanyType = {
   company_id: number
   company_name: string
 }
 
+function sortArray(array: CompanyType[]) {
+  return array.reverse()
+}
+
 const Prevoznici = () => {
-  const [companies, setCompanies] = useState([])
+  const [companies, setCompanies] = useState<CompanyType[]>([])
+
+  const [success, setSuccess] = useState(false)
 
   const [newCompanyModal, setNewCompanyModal] = useState(false)
 
   const user: User | any = useAuthState().user
 
   function deleteCompany(id: number) {
-    console.log("delete", id)
+    axiosClient
+      .delete(`/admin/companies/delete/${id}`)
+      .then((res) => {
+        console.log(res.data)
+        let message = res.data.msg
+        setSuccess(message)
+        setNewCompanyModal(false)
+        setCompanies(companies.filter((company) => company.company_id !== id))
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+  }
+
+  function addCompany(name: string) {
+    axiosClient
+      .post("/admin/companies/add", {
+        company_name: name
+      })
+      .then((res) => {
+        console.log(res.data)
+        let newCompany = res.data.company
+        let message = res.data.message
+        setSuccess(message)
+        setNewCompanyModal(false)
+        setCompanies([newCompany, ...companies])
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   }
 
   useEffect(() => {
@@ -27,7 +62,7 @@ const Prevoznici = () => {
       .get("/companies/all")
       .then((res) => {
         console.log(res.data)
-        setCompanies(res.data.companys)
+        setCompanies(sortArray(res.data.companys))
       })
       .catch((err) => {
         console.log(err)
@@ -37,10 +72,11 @@ const Prevoznici = () => {
     <div className="container py-5">
       <h1 className="page-title">Prevoznici</h1>
       <div className="item-list my-5">
-        {companies.map((company: Company, i) => {
+        <p className="info-text">{success}</p>
+        {companies.map((company: CompanyType, i) => {
           return (
             <Accordion
-              key={i}
+              key={company.company_id}
               id={company.company_id}
               onCollapse={() => false}
               header={
@@ -80,6 +116,7 @@ const Prevoznici = () => {
             <NewCompanyModal
               title={"Dodaj novog prevoznika"}
               closeModal={() => setNewCompanyModal(false)}
+              submitModal={addCompany}
             ></NewCompanyModal>
           ) : (
             ""
