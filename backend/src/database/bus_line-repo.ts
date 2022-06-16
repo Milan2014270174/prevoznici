@@ -66,6 +66,43 @@ async function create(params: IBusLine): Promise<IBusLine | null> {
   return bus_line;
 }
 
+async function getByCityIds(cityFrom: number, cityTo: number, date: string) {
+  const sql = `
+  SELECT * 
+  FROM bus_line
+  ${JOIN_TABLES.COMPANY}
+  JOIN bus_line_station bls ON bls.bus_line_id = bus_line.bus_line_id
+  JOIN city ON bls.city_id = city.city_id
+  WHERE (bls.bus_line_station_type = "POČETNO" OR
+  bls.bus_line_station_type = "KRAJNJE") AND
+  (
+    SELECT COUNT(*)
+    FROM bus_line_station blsOd
+    WHERE
+    	blsOd.bus_line_id = bus_line.bus_line_id AND
+    	blsOd.city_id = ? AND
+    	(
+    		SELECT COUNT(*)
+    		FROM bus_line_station blsDo
+    		WHERE
+    			blsDo.bus_line_id = bus_line.bus_line_id AND
+    			blsDo.city_id = ? AND
+            	blsDo.arrives_at > blsOd.arrives_at
+    	) > 0
+    ) > 0 AND
+    bus_line.reserved_date_at = DATE(?)
+    `
+  console.log(sql);
+  const { rows, fields } = await db.query(sql, [cityFrom, cityTo, date])
+
+  const bus_lines = rows as (IBusLine & IBusLineStation)[];
+
+
+  const toReturn = formatBusLines(bus_lines);
+
+  return toReturn;
+}
+
 
 /**
  * Get all bus_lines.
@@ -87,8 +124,20 @@ async function getAll(): Promise<IBusLine[]> {
 
   const bus_lines = rows as (IBusLine & IBusLineStation)[];
 
-  console.log(bus_lines);
 
+  const toReturn = formatBusLines(bus_lines);
+
+
+  // for (const busLine of bus_lines) {
+
+  //   busLine.stations = await loadStations(busLine.bus_line_id as number);
+  // }
+
+  return toReturn;
+}
+
+
+function formatBusLines(bus_lines: (IBusLine & IBusLineStation)[]) {
   const toReturn = [] as any[];
 
 
@@ -117,16 +166,8 @@ async function getAll(): Promise<IBusLine[]> {
     }
 
   }
-
-
-  // for (const busLine of bus_lines) {
-
-  //   busLine.stations = await loadStations(busLine.bus_line_id as number);
-  // }
-
   return toReturn;
 }
-
 
 async function loadStations(bus_line_id: number):
   Promise<(ICity & { arrives_at: string, bus_line_station_type: string })[]> {
@@ -173,6 +214,7 @@ async function update(bus_line_id: number, update: IBusLine) {
 
 // Export default
 export default {
+  getByCityIds,
   getById,
   getAll,
   update,

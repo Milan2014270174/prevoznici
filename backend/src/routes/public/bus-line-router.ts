@@ -24,8 +24,17 @@ export const p = {
 /**
  * Get all busLines.
  */
-router.get(p.get, async (_: Request, res: Response) => {
-  const busLines = await busLineService.getAll();
+router.get(p.get, async (req: Request, res: Response) => {
+
+  let busLines = [] as any;
+  if (req.query.cityFrom && req.query.cityTo && req.query.date) {
+    busLines = await busLineService.filterBusLines(
+      parseInt(req.query.cityFrom.toString()), parseInt(req.query.cityTo.toString()), req.query.date.toString()
+    )
+  } else {
+    busLines = await busLineService.getAll();
+  }
+
   return res.status(OK).json({ busLines });
 });
 

@@ -15,6 +15,18 @@ function getAll(): Promise<IBusLine[]> {
   return busLineRepo.getAll();
 }
 
+/**
+ * Get by city from, city to and date.
+ * @param cityFrom
+ * @param cityTo
+ * @param date
+ * @returns 
+ */
+function filterBusLines(cityFrom: number, cityTo: number, date: string): Promise<IBusLine[]> {
+
+  return busLineRepo.getByCityIds(cityFrom, cityTo, date);
+}
+
 
 /**
  * Add one busLine.
@@ -76,5 +88,6 @@ export default {
   getAll,
   create,
   updateOne,
+  filterBusLines,
   // delete: deleteOne,
 } as const;

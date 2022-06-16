@@ -9,6 +9,7 @@ const conn = mysql.createConnection({
   user: process.env.DB_USERNAME || "lightbul_autobuske_karte",
   database: process.env.DB_DATABASE || "lightbul_autobuske_karte",
   password: process.env.DB_PASSWORD || "S0&qHEC;I7(*",
+  dateStrings: true,
 });
 
 export const connection = conn;
