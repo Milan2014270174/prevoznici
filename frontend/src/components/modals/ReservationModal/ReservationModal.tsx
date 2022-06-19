@@ -1,7 +1,8 @@
-import React from "react"
+import React, { ReactNode } from "react"
 
 interface ReservationModalProps {
   title: string
+  body: ReactNode
   closeModal: () => any
 }
 

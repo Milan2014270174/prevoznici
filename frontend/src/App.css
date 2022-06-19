@@ -45,3 +45,8 @@ label {
   font-weight: bold;
   color: #0b5ed7;
 }
+.help-text {
+  color: rgb(154, 154, 154);
+  font-size: 14px;
+  font-weight: bold;
+}

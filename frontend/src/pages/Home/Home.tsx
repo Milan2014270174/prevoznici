@@ -17,6 +17,14 @@ export type DestinationType = {
   city_id: number
   city_name: string
 }
+export type ReservationModalType = {
+  show: boolean
+  ticket_type: string
+  to_bus_line_station_id: number | null
+  from_bus_line_station_id: number | null
+  reserved_for_date_at: string
+  seats_available: number | null
+}
 
 type PlannedLineType = {
   bus_line_id: number
@@ -24,6 +32,10 @@ type PlannedLineType = {
   available_seats: number
   POČETNO: DestinationType | any
   KRAJNJE: DestinationType | any
+}
+
+function sortArray(array: PlannedLineType[]) {
+  return array.reverse()
 }
 
 function todaysDate() {
@@ -36,6 +48,15 @@ function todaysDate() {
     "-" +
     `${date < 10 ? `0${date}` : date}`
   )
+}
+
+const initReservationModal = {
+  show: false,
+  ticket_type: "",
+  to_bus_line_station_id: null,
+  from_bus_line_station_id: null,
+  reserved_for_date_at: "",
+  seats_available: null
 }
 
 const Home = () => {
@@ -54,10 +75,19 @@ const Home = () => {
   const [cities, setCities] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const [successMessage, setSuccessMessage] = useState("")
+
   // Modali
-  const [reservationModal, setReservationModal] = useState(false)
+  const [reservationModal, setReservationModal] =
+    useState<ReservationModalType>(initReservationModal)
   const [authModal, setAuthModal] = useState(false)
   const [newLineModal, setNewLineModal] = useState(false)
+
+  function addNewLine(plannedLine: PlannedLineType) {
+    setPlannedLines([plannedLine, ...plannedLines])
+    setNewLineModal(false)
+    setSuccessMessage("Uspešno ste dodali novu liniju.")
+  }
 
   function handleInputChange(event: React.ChangeEvent<HTMLSelectElement>) {
     setInput({ ...input, [event.target.name]: event.target.value })
@@ -66,12 +96,25 @@ const Home = () => {
     setInput({ ...input, [event.target.name]: event.target.value })
   }
 
-  function openReservationModal(id: number) {
-    console.log("make reservation", id)
-    setReservationModal(true)
+  function openReservationModal(
+    ticket_type: string,
+    to_bus_line_station_id: number | null,
+    from_bus_line_station_id: number | null,
+    reserved_for_date_at: string,
+    seats_available: number | null
+  ) {
+    // console.log("make reservation", id)
+    setReservationModal({
+      show: true,
+      ticket_type: ticket_type,
+      to_bus_line_station_id: to_bus_line_station_id,
+      from_bus_line_station_id: from_bus_line_station_id,
+      reserved_for_date_at: reserved_for_date_at,
+      seats_available: seats_available
+    })
   }
   function closeReservationModal() {
-    setReservationModal(false)
+    setReservationModal(initReservationModal)
   }
   function closeAuthModal() {
     setAuthModal(false)
@@ -87,7 +130,7 @@ const Home = () => {
       .get("/bus-lines/all")
       .then((res) => {
         console.log("bus lines", res.data)
-        setPlannedLines(res.data.busLines)
+        setPlannedLines(sortArray(res.data.busLines))
       })
       .catch((err) => {
         console.log(err)
@@ -196,11 +239,16 @@ const Home = () => {
           </div>
         </div>
         <h3 className="subtitle my-5">{input.date}</h3>
+        {successMessage.length > 0 ? (
+          <p className="info-text">{successMessage}</p>
+        ) : (
+          ""
+        )}
         <div className="item-list my-5">
           {plannedLines.map((plannedLine: PlannedLineType, i) => {
             return (
               <PlannedLine
-                key={i}
+                key={plannedLine.bus_line_id}
                 id={plannedLine.bus_line_id}
                 company={plannedLine.company_name}
                 seats={plannedLine.available_seats}
@@ -217,16 +265,26 @@ const Home = () => {
                 endTime={
                   plannedLine.KRAJNJE ? plannedLine.KRAJNJE.arrives_at : ""
                 }
+                date={input.date}
                 openModal={openReservationModal}
               />
             )
           })}
         </div>
       </div>
-      {reservationModal ? (
+      {reservationModal.show ? (
         Object.keys(user).length > 0 ? (
           <ReservationModal
             title={"Rezervisi kartu"}
+            body={
+              <div>
+                Rezerviši
+                {/* ticket_type: ticket_type, to_bus_line_station_id:
+                to_bus_line_station_id, from_bus_line_station_id:
+                from_bus_line_station_id, reserved_for_date_at:
+                reserved_for_date_at, seats_available: seats_available */}
+              </div>
+            }
             closeModal={closeReservationModal}
           />
         ) : (
@@ -276,6 +334,7 @@ const Home = () => {
             <NewLineModal
               title={"Dodaj planiranu liniju"}
               closeModal={() => setNewLineModal(false)}
+              addNewLine={addNewLine}
             ></NewLineModal>
           ) : (
             ""

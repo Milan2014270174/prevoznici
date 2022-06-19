@@ -13,7 +13,14 @@ interface PlannedLine {
   endDestination: string
   startTime: string
   endTime: string
-  openModal: (params: number) => any
+  date: string
+  openModal: (
+    ticket_type: string,
+    to_bus_line_station_id: number | null,
+    from_bus_line_station_id: number | null,
+    reserved_for_date_at: string,
+    seats_available: number
+  ) => any
 }
 
 type Station = {
@@ -41,6 +48,7 @@ const PlannedLine = ({
   endDestination,
   startTime,
   endTime,
+  date,
   openModal
 }: PlannedLine) => {
   const [plannedLineStations, setPlannedLineStations] = useState<Station[]>([])
@@ -55,67 +63,59 @@ const PlannedLine = ({
     }
   })
   const [loadingStations, setLoadingStations] = useState(false)
+  const [price, setPrice] = useState<number | null>(null)
+  const [secondPrice, setSecondPrice] = useState<number | null>(null)
+  const [priceLoading, setPriceLoading] = useState(true)
   const [errorStations, setErrorStations] = useState("")
 
   function selectStation(i: number, id: number) {
-    if (!selectedStations.start.i) {
+    if (i === selectedStations.start.i) {
       setSelectedStations({
         ...selectedStations,
-        start: {
-          i: i,
-          id: id
-        }
+        start: { i: null, id: null }
       })
-      return
-    }
-    if (!selectedStations.end.i) {
+    } else if (i === selectedStations.end.i) {
       setSelectedStations({
         ...selectedStations,
-        end: {
-          i: i,
-          id: id
-        }
+        end: { i: null, id: null }
       })
-      return
     }
-    if (selectedStations.start.i) {
-      if (i < selectedStations.start.i) {
+    if (selectedStations.start.i === null) {
+      setSelectedStations({
+        ...selectedStations,
+        start: { i: i, id: id }
+      })
+    } else if (selectedStations.end.i === null) {
+      setSelectedStations({
+        ...selectedStations,
+        end: { i: i, id: id }
+      })
+    } else {
+      if (selectedStations.start.i > i) {
         setSelectedStations({
           ...selectedStations,
-          start: {
-            i: i,
-            id: id
-          }
+          start: { i: i, id: id }
         })
-        return
-      } else if (selectedStations.start.id === id) {
+      } else if (selectedStations.end.i < i) {
         setSelectedStations({
           ...selectedStations,
-          start: {
-            i: null,
-            id: null
-          }
+          end: { i: i, id: id }
         })
-      }
-    }
-    if (selectedStations.end.i) {
-      if (i < selectedStations.end.i) {
-        setSelectedStations({
-          ...selectedStations,
-          end: {
-            i: i,
-            id: id
-          }
-        })
-        return
-      } else if (selectedStations.end.id === id) {
-        setSelectedStations({
-          ...selectedStations,
-          end: {
-            i: null,
-            id: null
-          }
-        })
+      } else if (selectedStations.end.i > i && i > selectedStations.start.i) {
+        if (
+          selectedStations.end.i - i > i - selectedStations.start.i ||
+          selectedStations.end.i - i === i - selectedStations.start.i
+        ) {
+          setSelectedStations({
+            ...selectedStations,
+            start: { i: i, id: id }
+          })
+        } else {
+          setSelectedStations({
+            ...selectedStations,
+            end: { i: i, id: id }
+          })
+        }
       }
     }
   }
@@ -128,7 +128,19 @@ const PlannedLine = ({
         console.log(res.data)
         let tempStations = res.data.busLineStations
         setPlannedLineStations(
-          tempStations.map((station: Station) => {
+          tempStations.map((station: Station, i: number) => {
+            if (station.bus_line_station_type === "POČETNO") {
+              setSelectedStations({
+                ...selectedStations,
+                start: { i: i, id: station.bus_line_station_id }
+              })
+            }
+            if (station.bus_line_station_type === "KRAJNJE") {
+              setSelectedStations({
+                ...selectedStations,
+                end: { i: i, id: station.bus_line_station_id }
+              })
+            }
             return {
               arrives_at: station.arrives_at,
               bus_line_id: station.bus_line_id,
@@ -139,20 +151,27 @@ const PlannedLine = ({
             }
           })
         )
+        let start: SelectedStation = {
+          i: null,
+          id: null
+        }
+        let end: SelectedStation = {
+          i: null,
+          id: null
+        }
         for (let i = 0; i < tempStations.length; i++) {
           if (tempStations[i].bus_line_station_type === "POČETNO") {
-            setSelectedStations({
-              ...selectedStations,
-              start: { i: i, id: tempStations[i].bus_line_station_id }
-            })
+            console.log("POČETNO")
+            start = { i: i, id: tempStations[i].bus_line_station_id }
           }
           if (tempStations[i].bus_line_station_type === "KRAJNJE") {
-            setSelectedStations({
-              ...selectedStations,
-              end: { i: i, id: tempStations[i].bus_line_station_id }
-            })
+            end = { i: i, id: tempStations[i].bus_line_station_id }
           }
         }
+        setSelectedStations({
+          start,
+          end
+        })
         setLoadingStations(false)
       })
       .catch((err) => {
@@ -161,7 +180,33 @@ const PlannedLine = ({
       })
   }
 
-  useEffect(() => {}, [selectedStations])
+  useEffect(() => {
+    if (selectedStations.start.i !== null && selectedStations.end.i !== null) {
+      axiosClient
+        .get("/tickets/calculate-price", {
+          params: {
+            from_bus_line_station_id: selectedStations.start.id,
+            to_bus_line_station_id: selectedStations.end.id
+          }
+        })
+        .then((res) => {
+          console.log(res.data)
+          setPriceLoading(false)
+          setPrice(res.data.price)
+          setSecondPrice(res.data.price * 1.9)
+        })
+        .catch((err) => {
+          console.log(err)
+          setPriceLoading(false)
+          setPrice(null)
+          setSecondPrice(null)
+        })
+    } else {
+      setPriceLoading(false)
+      setPrice(null)
+      setSecondPrice(null)
+    }
+  }, [selectedStations])
 
   return (
     <Accordion
@@ -189,7 +234,7 @@ const PlannedLine = ({
         <div className="p-1">
           <div className="row">
             <div className="col-12 col-md-6 d-flex flex-column justify-content-start align-items-start">
-              <h4 className="station-title mb-3">Stajališta:</h4>
+              <h4 className="planned-line-subtitle mb-3">Stajališta:</h4>
               <div className="stations-list w-100">
                 {loadingStations ? (
                   <Loading />
@@ -205,8 +250,8 @@ const PlannedLine = ({
                       isSelected = true
                       isColored = true
                     } else if (
-                      selectedStations.start.i &&
-                      selectedStations.end.i &&
+                      selectedStations.start.i !== null &&
+                      selectedStations.end.i !== null &&
                       i > selectedStations.start.i &&
                       i < selectedStations.end.i
                     ) {
@@ -223,7 +268,7 @@ const PlannedLine = ({
                           selectStation(i, station.bus_line_station_id)
                         }
                       >
-                        <h4 className="station-title mb-0">
+                        <h4 className="planned-line-subtitle mb-0">
                           {station.city_name} ({station.bus_line_station_type})
                         </h4>
                         <div className="station-info d-flex align-items-center gap-3">
@@ -232,8 +277,6 @@ const PlannedLine = ({
                           </p>
                           {isSelected ? (
                             <i className="fa-solid fa-circle"></i>
-                          ) : isColored ? (
-                            <i className="fa-solid fa-ellipsis-vertical"></i>
                           ) : (
                             <i className="fa-solid fa-circle-dot"></i>
                           )}
@@ -253,15 +296,70 @@ const PlannedLine = ({
                 )}
               </div>
             </div>
-            <div className="col-4 col-md-6 d-flex justify-content-end align-items-center">
-              <button
-                type="button"
-                onClick={() => {
-                  openModal(1)
-                }}
-              >
-                - 1.200,00 RSD
-              </button>
+            <div className="row col-4 col-md-6 d-flex justify-content-end align-items-center">
+              <div className="col-12 d-flex flex-column align-items-end">
+                <h4 className="planned-line-subtitle mb-2">
+                  Cena karte u jednom smeru
+                </h4>
+                {price && !priceLoading ? (
+                  <button
+                    id="price-1"
+                    type="button"
+                    onClick={() => {
+                      openModal(
+                        "U OBA SMERA",
+                        selectedStations.start.i,
+                        selectedStations.end.i,
+                        date,
+                        seats
+                      )
+                    }}
+                    className={`btn btn-primary`}
+                  >
+                    <i className="fa-solid fa-arrow-right"></i> {price} RSD
+                  </button>
+                ) : !priceLoading ? (
+                  <p className="help-text text-end">
+                    Morate izabrati i početnu i krajnju destinaciju kako biste
+                    učitali cenu.
+                  </p>
+                ) : (
+                  <Loading />
+                )}
+              </div>
+              <div className="col-12">
+                <div className="col-12 d-flex flex-column align-items-end">
+                  <h4 className="planned-line-subtitle mb-2">
+                    Cena povratne karte
+                  </h4>
+                  {secondPrice && !priceLoading ? (
+                    <button
+                      id="price-2"
+                      type="button"
+                      onClick={() => {
+                        openModal(
+                          "U OBA SMERA",
+                          selectedStations.start.i,
+                          selectedStations.end.i,
+                          date,
+                          seats
+                        )
+                      }}
+                      className={`btn btn-primary`}
+                    >
+                      <i className="fa-solid fa-arrow-right-arrow-left"></i>{" "}
+                      {secondPrice} RSD
+                    </button>
+                  ) : !priceLoading ? (
+                    <p className="help-text text-end">
+                      Morate izabrati i početnu i krajnju destinaciju kako biste
+                      učitali cenu.
+                    </p>
+                  ) : (
+                    <Loading />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
