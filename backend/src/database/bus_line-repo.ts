@@ -28,19 +28,23 @@ const JOIN_TABLES = {
  * @param bus_line_id 
  * @returns 
  */
-async function getById(bus_line_id: number, withStations = false): Promise<IBusLine | null> {
+async function getById(bus_line_id: number): Promise<IBusLine | null> {
   const { rows, fields } = (await db.query(
     `SELECT * FROM ${TABLE} 
     ${JOIN_TABLES.COMPANY}
-    WHERE bus_line_id = ?`, [bus_line_id]
+    JOIN bus_line_station bls ON bls.bus_line_id = bus_line.bus_line_id
+    JOIN city ON bls.city_id = city.city_id
+    WHERE bus_line.bus_line_id = ? AND
+    (bls.bus_line_station_type = 'POČETNO' OR
+    bls.bus_line_station_type = 'KRAJNJE')
+    `, [bus_line_id]
   ));
-  const bus_line = rows[0] as IBusLine;
-  if (withStations)
-    bus_line.stations = await loadStations(bus_line.bus_line_id as number);
-  if (!bus_line) null;
+  const bus_lines = rows as (IBusLine & IBusLineStation)[];;
+  if (!bus_lines) null
 
+  const toReturn = formatBusLines(bus_lines);
 
-  return bus_line;
+  return toReturn[0] as IBusLine;
 }
 
 
@@ -50,7 +54,7 @@ async function getById(bus_line_id: number, withStations = false): Promise<IBusL
  * @param {IBusLine} params
  * @returns {*}  {(Promise<IBusLine | null>)}
  */
-async function create(params: IBusLine): Promise<IBusLine | null> {
+async function create(params: IBusLine): Promise<{ bus_line_id: number } | null> {
   const { rows, fields, result } = (await db.query(
     `INSERT INTO ${TABLE} SET ?`, params
   ));
@@ -60,10 +64,10 @@ async function create(params: IBusLine): Promise<IBusLine | null> {
 
     return null;
   }
-  const bus_line = await getById(result.insertId as number);
 
-
-  return bus_line;
+  return {
+    bus_line_id: result.insertId
+  };
 }
 
 async function getByCityIds(cityFrom: number, cityTo: number, date: string) {

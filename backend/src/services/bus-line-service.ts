@@ -48,7 +48,7 @@ async function create(busLine: IBusLine, stations: IBusLineStation[]) {
   await busLineStationRepo.createMany(modifiedStations);
 
 
-  return insertedBusLine;
+  return busLineRepo.getById(insertedBusLine.bus_line_id as number);
 }
 
 
