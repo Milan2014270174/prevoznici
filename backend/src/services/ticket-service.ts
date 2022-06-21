@@ -82,10 +82,13 @@ async function addOne(ticket: ITicket): Promise<ITicket | null> {
     fullPrice: busline.bus_line_price
   })
 
-  const resrvedDateAt = new Date(busline.reserved_date_at)
+  let expiresAt = null
 
-  const expiresAt = new Date(resrvedDateAt.setMonth(resrvedDateAt.getMonth() + 2)).toISOString();
+  if (ticket.ticket_type == 'POVRATNA') {
+    const resrvedDateAt = new Date(busline.reserved_date_at)
 
+    expiresAt = new Date(resrvedDateAt.setMonth(resrvedDateAt.getMonth() + 2)).toISOString();
+  }
   return ticketRepo.create({
     ...ticket,
     roundtrip_expires_at: expiresAt
