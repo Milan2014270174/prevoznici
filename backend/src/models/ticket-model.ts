@@ -8,7 +8,7 @@ export interface ITicket {
   user_id: number
   to_bus_line_station_id: number
   from_bus_line_station_id: number
-  reserved_roundtrip_at: string
+  roundtrip_expires_at: string
 
   toStation?: any;
   fromStation?: any;

@@ -82,7 +82,14 @@ async function addOne(ticket: ITicket): Promise<ITicket | null> {
     fullPrice: busline.bus_line_price
   })
 
-  return ticketRepo.create(ticket);
+  const resrvedDateAt = new Date(busline.reserved_date_at)
+
+  const expiresAt = new Date(resrvedDateAt.setMonth(resrvedDateAt.getMonth() + 2)).toISOString();
+
+  return ticketRepo.create({
+    ...ticket,
+    roundtrip_expires_at: expiresAt
+  });
 }
 
 function calculatePrice({
@@ -191,7 +198,7 @@ function getSeatCalculationsOnlyNumberOfFreeSeats(
   return seatCalculations;
 }
 
-async function createTicketDryRun(ticket:any) {
+async function createTicketDryRun(ticket: any) {
   const busLineStationFrom = await busLineStationRepo.getById(ticket.from_bus_line_station_id);
   const busLineStationTo = await busLineStationRepo.getById(ticket.to_bus_line_station_id);
 

@@ -64,7 +64,6 @@ router.post(p.add,
     .if(body('to_bus_line_station_id').exists())
     .notEmpty()
     .custom((value, { req }) => value !== req.body.to_bus_line_station_id),
-  body('reserved_roundtrip_at').if(body('ticket_type').equals('POVRATNA')).notEmpty(),
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
