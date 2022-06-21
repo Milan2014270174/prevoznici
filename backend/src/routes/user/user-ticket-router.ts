@@ -42,7 +42,6 @@ router.get(p.get, async (req: Request, res: Response) => {
  * Reserve a ticket.
  */
 router.post(p.add,
-  body('reserved_for_date_at').isDate().isAfter(new Date().toISOString()),
   body('ticket_type').isIn(['POVRATNA', 'U JEDNOM SMERU']),
   body('is_paid').isBoolean().default(true).optional(),
   body('to_bus_line_station_id'),
