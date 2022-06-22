@@ -1,24 +1,13 @@
 import React, { useEffect, useState } from "react"
 import axiosClient from "../../../axios/axiosClient"
+import { defaultDate } from "../../../pages/Home/Home"
 
 const today = new Date()
-
-function todaysDate() {
-  var date = today.getDate()
-  var month = today.getMonth() + 1
-  return (
-    today.getFullYear() +
-    "-" +
-    `${month < 10 ? `0${month}` : month}` +
-    "-" +
-    `${date < 10 ? `0${date}` : date}`
-  )
-}
 
 interface NewLineModalProps {
   title: string
   closeModal: () => any
-  addNewLine: (params: any) => any
+  addNewLine: (params: any, date: string) => any
 }
 
 function newStation() {
@@ -34,7 +23,7 @@ const initialState = {
   bus_line_price: 0,
   available_seats: 0,
   bus_register_number: "",
-  date: todaysDate(),
+  date: defaultDate(),
   startStation: {
     city_id: "",
     arrives_at: ""
@@ -184,13 +173,14 @@ const NewLineModal = ({ title, closeModal, addNewLine }: NewLineModalProps) => {
             driver_hash: Math.random().toString(36).slice(2, 7),
             available_seats: input.available_seats,
             bus_register_number: Math.random().toString(36).slice(2, 7),
-            company_id: input.prevoznik
+            company_id: input.prevoznik,
+            reserved_date_at: input.date
           },
           stations: stations
         })
         .then((res) => {
           console.log(res.data)
-          addNewLine(res.data.busLine)
+          addNewLine(res.data.busLine, input.date)
         })
         .catch((err) => {
           console.log("submit error", err)
@@ -268,6 +258,7 @@ const NewLineModal = ({ title, closeModal, addNewLine }: NewLineModalProps) => {
                   name="date"
                   value={input.date}
                   onChange={handleDateChange}
+                  min={defaultDate()}
                   type="date"
                   className={`form-control ${
                     input.date === "" && input.error ? "is-invalid" : ""
@@ -282,7 +273,7 @@ const NewLineModal = ({ title, closeModal, addNewLine }: NewLineModalProps) => {
                   value={input.available_seats}
                   onChange={handleInputChange}
                   type="number"
-                  min={0}
+                  min={1}
                   className={`form-control ${
                     input.available_seats === 0 && input.error
                       ? "is-invalid"

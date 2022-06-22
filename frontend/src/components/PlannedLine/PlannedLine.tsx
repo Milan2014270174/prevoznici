@@ -19,7 +19,8 @@ interface PlannedLine {
     to_bus_line_station_id: number | null,
     from_bus_line_station_id: number | null,
     reserved_for_date_at: string,
-    seats_available: number
+    seats_available: number,
+    price: number
   ) => any
 }
 
@@ -307,11 +308,12 @@ const PlannedLine = ({
                     type="button"
                     onClick={() => {
                       openModal(
-                        "U OBA SMERA",
-                        selectedStations.start.i,
-                        selectedStations.end.i,
+                        "U JEDNOM SMERU",
+                        selectedStations.start.id,
+                        selectedStations.end.id,
                         date,
-                        seats
+                        seats,
+                        price
                       )
                     }}
                     className={`btn btn-primary`}
@@ -338,11 +340,12 @@ const PlannedLine = ({
                       type="button"
                       onClick={() => {
                         openModal(
-                          "U OBA SMERA",
-                          selectedStations.start.i,
-                          selectedStations.end.i,
+                          "POVRATNA",
+                          selectedStations.start.id,
+                          selectedStations.end.id,
                           date,
-                          seats
+                          seats,
+                          secondPrice
                         )
                       }}
                       className={`btn btn-primary`}
