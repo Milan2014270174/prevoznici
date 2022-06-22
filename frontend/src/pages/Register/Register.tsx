@@ -63,7 +63,7 @@ const Register = () => {
   return (
     <div className="login-page py-5">
       <div className="container">
-        <h1 className="mb-3">Registracija</h1>
+        <h1 className="mb-3 page-title">Registracija</h1>
         <form onSubmit={handleSubmit} className="mb-3 needs-validation ">
           <div className="mb-3">
             <label htmlFor="exampleInputEmail1" className="form-label">

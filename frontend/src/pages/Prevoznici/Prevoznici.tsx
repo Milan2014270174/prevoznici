@@ -70,7 +70,7 @@ const Prevoznici = () => {
   }, [])
   return (
     <div className="container py-5">
-      <h1 className="page-title">Prevoznici</h1>
+      <h1 className="page-title mb-3">Prevoznici</h1>
       <div className="item-list my-5">
         <p className="info-text">{success}</p>
         {companies.map((company: CompanyType, i) => {
