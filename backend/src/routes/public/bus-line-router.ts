@@ -28,9 +28,19 @@ router.get(p.get, async (req: Request, res: Response) => {
 
   let busLines = [] as any;
   if (req.query.cityFrom && req.query.cityTo && req.query.date) {
-    busLines = await busLineService.filterBusLines(
-      parseInt(req.query.cityFrom.toString()), parseInt(req.query.cityTo.toString()), req.query.date.toString()
-    )
+
+    const companyId = req.query.company_id;
+
+    if (!companyId) {
+
+      busLines = await busLineService.filterBusLines(
+        parseInt(req.query.cityFrom.toString()), parseInt(req.query.cityTo.toString()), req.query.date.toString()
+      )
+    } else {
+      busLines = await busLineService.filterBusLines(
+        parseInt(req.query.cityFrom.toString()), parseInt(req.query.cityTo.toString()), req.query.date.toString(), parseInt(companyId.toString())
+      )
+    }
   } else {
     busLines = await busLineService.getAll();
   }

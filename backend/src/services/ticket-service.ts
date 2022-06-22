@@ -55,15 +55,13 @@ async function addOne(ticket: ITicket): Promise<ITicket | null> {
 
   const allStationsOnLine = await busLineStationRepo.getByBusLineId(busLineId);
 
-  const seatCalculations = getSeatCalculations(allStationsOnLine, busline, busLineTickets);
+  const seatCalculations = getSeatCalculationsOnlyNumberOfFreeSeats(allStationsOnLine, busline, busLineTickets);
 
   if (
     seatCalculations[ticket.from_bus_line_station_id].reservedSeatsNumber
     > busline.available_seats - 1) {
     throw new Error('Nema dovoljno mesta na ovoj stanici.');
   }
-
-  ticket.seat_number = seatCalculations[ticket.from_bus_line_station_id].freeSeats[0];
 
   const firstStation = allStationsOnLine.find(bls => bls.bus_line_station_type === 'POČETNO');
   const lastStation = allStationsOnLine.find(bls => bls.bus_line_station_type === 'KRAJNJE');
@@ -88,9 +86,11 @@ async function addOne(ticket: ITicket): Promise<ITicket | null> {
     const resrvedDateAt = new Date(busline.reserved_date_at)
 
     expiresAt = new Date(resrvedDateAt.setMonth(resrvedDateAt.getMonth() + 2)).toISOString();
+    ticket.ticket_price = Math.round(ticket.ticket_price * 2 * 0.9)
   }
   return ticketRepo.create({
     ...ticket,
+    ticket_price: ticket.ticket_price * ticket.number_of_tickets,
     roundtrip_expires_at: expiresAt
   });
 }
@@ -122,48 +122,6 @@ function timeToMinutes(time: string) {
   return minutes;
 }
 
-function getSeatCalculations(
-  allLineStations: any[], busline: { available_seats: number; }, busLineTickets: any[]
-): any {
-  const seatCalculations: any = {};
-
-  for (let index = 0; index < allLineStations.length; index++) {
-
-    seatCalculations[allLineStations[index].bus_line_station_id + ''] = {}
-    seatCalculations[allLineStations[index].bus_line_station_id + ''].reservedSeatsNumber = 0;
-    seatCalculations[allLineStations[index].bus_line_station_id + ''].freeSeats
-      = [...Array(busline.available_seats).keys()].map(x => ++x + '');
-  }
-
-
-
-  busLineTickets.forEach((ticket:
-    { to_bus_line_station_id: any; from_bus_line_station_id: any; seat_number: string; }
-  ) => {
-
-    const iTo =
-      allLineStations.findIndex((station: { bus_line_station_id: any; }) =>
-        station.bus_line_station_id == ticket.to_bus_line_station_id
-      );
-
-    const iFrom =
-      allLineStations.findIndex((station: { bus_line_station_id: any; }) =>
-        station.bus_line_station_id == ticket.from_bus_line_station_id
-      );
-
-
-    for (let index = iFrom; index <= iTo; index++) {
-
-      seatCalculations[allLineStations[index].bus_line_station_id + ''].reservedSeatsNumber += 1;
-      seatCalculations[allLineStations[index].bus_line_station_id + ''].freeSeats =
-        seatCalculations[allLineStations[index].bus_line_station_id + ''].freeSeats
-          .filter((seat: string) => seat != ticket.seat_number);
-    }
-  })
-
-  return seatCalculations;
-}
-
 function getSeatCalculationsOnlyNumberOfFreeSeats(
   allLineStations: any[], busline: { available_seats: number; }, busLineTickets: any[]
 ): any {
@@ -178,7 +136,7 @@ function getSeatCalculationsOnlyNumberOfFreeSeats(
 
 
   busLineTickets.forEach((ticket:
-    { to_bus_line_station_id: any; from_bus_line_station_id: any; seat_number: string; }
+    { to_bus_line_station_id: any; from_bus_line_station_id: any; number_of_tickets: string; }
   ) => {
 
     const iTo =
@@ -191,10 +149,10 @@ function getSeatCalculationsOnlyNumberOfFreeSeats(
         station.bus_line_station_id == ticket.from_bus_line_station_id
       );
 
-
     for (let index = iFrom; index <= iTo; index++) {
 
-      seatCalculations[allLineStations[index].bus_line_station_id + ''].reservedSeatsNumber += 1;
+
+      seatCalculations[allLineStations[index].bus_line_station_id + ''].reservedSeatsNumber += ticket.number_of_tickets ? ticket.number_of_tickets : 0;
     }
   })
 
@@ -219,15 +177,14 @@ async function createTicketDryRun(ticket: any) {
 
   const allStationsOnLine = await busLineStationRepo.getByBusLineId(busLineId);
 
-  const seatCalculations = getSeatCalculations(allStationsOnLine, busline, busLineTickets);
+  const seatCalculations = getSeatCalculationsOnlyNumberOfFreeSeats(allStationsOnLine, busline, busLineTickets);
+  console.log(seatCalculations)
 
   if (
     seatCalculations[ticket.from_bus_line_station_id].reservedSeatsNumber
     > busline.available_seats - 1) {
     throw new Error('Nema dovoljno mesta na ovoj stanici.');
   }
-
-  ticket.seat_number = seatCalculations[ticket.from_bus_line_station_id].freeSeats[0];
 
   const firstStation = allStationsOnLine.find(bls => bls.bus_line_station_type === 'POČETNO');
   const lastStation = allStationsOnLine.find(bls => bls.bus_line_station_type === 'KRAJNJE');
@@ -246,7 +203,11 @@ async function createTicketDryRun(ticket: any) {
     fullPrice: busline.bus_line_price
   })
 
-  return ticket.ticket_price;
+  return {
+    roundTrip: Math.round(ticket.ticket_price * 2 * 0.9),
+    oneWay: ticket.ticket_price 
+
+  }
 }
 
 

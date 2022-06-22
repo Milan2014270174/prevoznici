@@ -78,7 +78,7 @@ async function create(params: ITicket): Promise<ITicket | null> {
 async function getAll(): Promise<ITicket[]> {
 
   const { rows, fields } = (await db.query(
-    `SELECT * FROM ${TABLE}`
+    `SELECT * FROM ${TABLE} ORDER BY is_paid ASC`
   ));
 
   const tickets = rows as ITicket[];
@@ -136,7 +136,7 @@ async function getByUserId(userId: number, loadStations = false):
     JOIN bus_line_station ON ticket.to_bus_line_station_id = bus_line_station.bus_line_station_id
     JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
     WHERE ticket.user_id = ${userId}
-    ORDER BY arrives_at
+    ORDER BY is_paid ASC
     `
   ));
 
@@ -163,7 +163,7 @@ async function loadCity(bus_line_station_id: number):
   if (!busLineStation) return null
 
   const station = {
-    ...(await cityRepo.getById(busLineStation.station_id)),
+    ...(await cityRepo.getById(busLineStation.city_id)),
     arrives_at: busLineStation.arrives_at,
     bus_line_station_type: busLineStation.bus_line_station_type
 

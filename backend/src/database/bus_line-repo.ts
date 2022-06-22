@@ -70,8 +70,8 @@ async function create(params: IBusLine): Promise<{ bus_line_id: number } | null>
   };
 }
 
-async function getByCityIds(cityFrom: number, cityTo: number, date: string) {
-  const sql = `
+async function getByCityIds(cityFrom: number, cityTo: number, date: string, company_id?:number) {
+  let sql = `
   SELECT * 
   FROM bus_line
   ${JOIN_TABLES.COMPANY}
@@ -94,9 +94,13 @@ async function getByCityIds(cityFrom: number, cityTo: number, date: string) {
             	blsDo.arrives_at > blsOd.arrives_at
     	) > 0
     ) > 0 AND
-    bus_line.reserved_date_at = DATE(?)
+    bus_line.reserved_date_at = DATE(?) 
     `
-  console.log(sql);
+  
+  if (company_id)
+    sql += `AND bus_line.company_id = ${company_id}`;   
+  
+  
   const { rows, fields } = await db.query(sql, [cityFrom, cityTo, date])
 
   const bus_lines = rows as (IBusLine & IBusLineStation)[];

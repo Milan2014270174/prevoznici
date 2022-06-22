@@ -22,9 +22,9 @@ function getAll(): Promise<IBusLine[]> {
  * @param date
  * @returns 
  */
-function filterBusLines(cityFrom: number, cityTo: number, date: string): Promise<IBusLine[]> {
+function filterBusLines(cityFrom: number, cityTo: number, date: string, company_id?: number): Promise<IBusLine[]> {
 
-  return busLineRepo.getByCityIds(cityFrom, cityTo, date);
+  return busLineRepo.getByCityIds(cityFrom, cityTo, date, company_id);
 }
 
 
