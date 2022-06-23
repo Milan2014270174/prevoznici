@@ -55,19 +55,19 @@ router.post(p.add,
  * Update one busLine.
  */
 router.put(p.update,
-  body('line.bus_line_id').isNumeric(),
-  body('line.bus_line_price').isNumeric(),
-  body('line.reserved_date_at').isDate(),
-  body('line.driver_hash'),
-  body('line.available_seats').isNumeric(),
-  body('line.bus_register_number'),
+  body('line.bus_line_id').isNumeric().optional(),
+  body('line.bus_line_price').isNumeric().optional(),
+  body('line.reserved_date_at').isDate().optional(),
+  body('line.driver_hash').optional(),
+  body('line.available_seats').isNumeric().optional(),
+  body('line.bus_register_number').optional(),
   body('line.company_id').isNumeric().withMessage('Izaberite kompaniju.'),
   body('stations').isArray(),
-  body('stations.*.bus_line_station_id').isNumeric().withMessage('Nepostojeća stanica.'),
-  body('stations.*.city_id').isNumeric().withMessage('Nepostojeći grad.'),
+  body('stations.*.bus_line_station_id').isNumeric().withMessage('Nepostojeća stanica.').optional(),
+  body('stations.*.city_id').isNumeric().withMessage('Nepostojeći grad.').optional(),
   body('stations.*.arrives_at')
-    .custom((value: string) => new RegExp(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).test(value)),
-  body('stations.*.bus_line_station_type').isIn(['IZMEĐU', 'POČETNO', 'KRAJNJE']),
+    .custom((value: string) => new RegExp(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).test(value)).optional(),
+  body('stations.*.bus_line_station_type').isIn(['IZMEĐU', 'POČETNO', 'KRAJNJE']).optional(),
   async (req: Request, res: Response) => {
 
     const errors = validationResult(req);
