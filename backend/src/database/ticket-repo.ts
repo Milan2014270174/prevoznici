@@ -83,7 +83,9 @@ async function getAll(): Promise<ITicket[]> {
     JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
     JOIN company ON company.company_id = bus_line.company_id
     JOIN user ON user.user_id = ticket.user_id
-    ORDER BY is_paid ASC`
+    ORDER BY is_paid ASC, bus_line.reserved_date_at DESC
+    
+    `
   ));
 
   const tickets = rows as ITicket[];

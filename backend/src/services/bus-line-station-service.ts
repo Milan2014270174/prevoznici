@@ -62,6 +62,8 @@ async function getByBusLineId(id: number):
       seatCalculations[busLineStations[index].bus_line_station_id].reservedSeatsNumber
   })
 
+  console.log(busLineStations);
+
   return busLineStations;
 }
 

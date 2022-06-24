@@ -59,7 +59,7 @@ async function addOne(ticket: ITicket): Promise<ITicket | null> {
 
   if (
     seatCalculations[ticket.from_bus_line_station_id].reservedSeatsNumber
-    > busline.available_seats - 1) {
+    > busline.available_seats - ticket.number_of_tickets) {
     throw new Error('Nema dovoljno mesta na ovoj stanici.');
   }
 
@@ -182,7 +182,7 @@ async function createTicketDryRun(ticket: any) {
 
   if (
     seatCalculations[ticket.from_bus_line_station_id].reservedSeatsNumber
-    > busline.available_seats - 1) {
+    > busline.available_seats - ticket.number_of_tickets) {
     throw new Error('Nema dovoljno mesta na ovoj stanici.');
   }
 
