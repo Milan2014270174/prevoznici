@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import "./prevoznici.css"
 import axiosClient from "../../axios/axiosClient"
 import Accordion from "../../components/Accordion/Accordion"

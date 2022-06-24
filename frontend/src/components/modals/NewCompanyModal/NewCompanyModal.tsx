@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import axiosClient from "../../../axios/axiosClient"
 import "./new-company-modal.css"
 
 interface ModalProps {

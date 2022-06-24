@@ -13,7 +13,6 @@ const PrivateRoute = ({ Component, isAuthenticated }: RouteProps) => {
       replace
       to={{
         pathname: "/login"
-        // state: { from: location },
       }}
     />
   )

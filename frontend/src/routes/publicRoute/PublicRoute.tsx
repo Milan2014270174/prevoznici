@@ -13,7 +13,6 @@ function PublicRoute({ Component, isAuthenticated }: RouteProps) {
       replace
       to={{
         pathname: "/"
-        // state: { from: location },
       }}
     />
   )

@@ -1,9 +1,8 @@
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useAuthDispatch, useAuthState } from "./context/authentication"
 import "./App.css"
 import { Routes, Route } from "react-router-dom"
 import PublicRoute from "./routes/publicRoute/PublicRoute"
-import AdminRoute from "./routes/adminRoute/AdminRoute"
 import Login from "./pages/Login/Login"
 import Home from "./pages/Home/Home"
 import AppWrapper from "./components/AppWrapper/AppWrapper"
@@ -13,14 +12,12 @@ import Reservations from "./pages/Reservations/Reservations"
 import Prevoznici from "./pages/Prevoznici/Prevoznici"
 import axiosClient from "./axios/axiosClient"
 
-import { User } from "./reducers/authentication"
 import PrivateRoute from "./routes/privateRoute/PrivateRoute"
 
 function App() {
   const dispatch = useAuthDispatch()
   const [loading, setLoading] = useState(true)
   const auth = useAuthState()
-  const user: User | any = useAuthState().user
   const [loggedIn, setLoggedIn] = useState(false)
 
   useEffect(() => {
@@ -47,10 +44,6 @@ function App() {
     }
     setLoading(false)
   }, [auth])
-
-  useEffect(() => {
-    console.log("logged in", loggedIn)
-  }, [loggedIn])
 
   return (
     <div className="App">
