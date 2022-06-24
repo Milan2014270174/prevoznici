@@ -78,7 +78,12 @@ async function create(params: ITicket): Promise<ITicket | null> {
 async function getAll(): Promise<ITicket[]> {
 
   const { rows, fields } = (await db.query(
-    `SELECT * FROM ${TABLE} ORDER BY is_paid ASC`
+    `SELECT * FROM ${TABLE}
+    JOIN bus_line_station ON ticket.to_bus_line_station_id = bus_line_station.bus_line_station_id
+    JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
+    JOIN company ON company.company_id = bus_line.company_id
+    JOIN user ON user.user_id = ticket.user_id
+    ORDER BY is_paid ASC`
   ));
 
   const tickets = rows as ITicket[];
@@ -105,6 +110,8 @@ async function getByBusLineId(buslineId: number, loadStations = false):
     `SELECT * FROM ${TABLE} 
     JOIN bus_line_station ON ticket.to_bus_line_station_id = bus_line_station.bus_line_station_id
     JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
+    JOIN company ON company.company_id = bus_line.company_id
+    JOIN user ON user.user_id = ticket.user_id
     WHERE bus_line.bus_line_id = ${buslineId}
     ORDER BY arrives_at
     `
@@ -135,6 +142,8 @@ async function getByUserId(userId: number, loadStations = false):
     `SELECT * FROM ${TABLE} 
     JOIN bus_line_station ON ticket.to_bus_line_station_id = bus_line_station.bus_line_station_id
     JOIN bus_line ON bus_line_station.bus_line_id = bus_line.bus_line_id
+    JOIN company ON company.company_id = bus_line.company_id
+    JOIN user ON user.user_id = ticket.user_id
     WHERE ticket.user_id = ${userId}
     ORDER BY is_paid ASC
     `
