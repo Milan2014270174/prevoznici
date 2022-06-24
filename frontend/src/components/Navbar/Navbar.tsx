@@ -84,7 +84,7 @@ const Navbar = () => {
                 Prevoznici
               </NavLink>
             </li>
-            {Object.keys(user).length > 0 && user.role_id === 1 ? (
+            {Object.keys(user).length > 0 ? (
               <li className="nav-item">
                 <NavLink
                   className={({ isActive }) =>

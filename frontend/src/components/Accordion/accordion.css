@@ -38,3 +38,6 @@
   z-index: 1000;
   transition: all 250ms;
 }
+.accordion-item.selected .accordion-button {
+  background-color: rgba(52, 143, 255, 0.309);
+}

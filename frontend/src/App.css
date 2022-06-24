@@ -55,3 +55,14 @@ label {
   font-size: 32px;
   font-weight: bold;
 }
+.modal {
+  background-color: rgba(0, 0, 0, 0.19);
+}
+.link {
+  cursor: pointer;
+}
+@media only screen and (max-width: 768px) {
+  .page-title {
+    font-size: 26px;
+  }
+}

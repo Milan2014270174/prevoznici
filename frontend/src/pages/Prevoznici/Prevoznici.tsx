@@ -18,7 +18,7 @@ function sortArray(array: CompanyType[]) {
 const Prevoznici = () => {
   const [companies, setCompanies] = useState<CompanyType[]>([])
 
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState("")
 
   const [newCompanyModal, setNewCompanyModal] = useState(false)
 
@@ -58,6 +58,14 @@ const Prevoznici = () => {
   }
 
   useEffect(() => {
+    if (success.length > 0) {
+      setTimeout(() => {
+        setSuccess("")
+      }, 5000)
+    }
+  }, [success])
+
+  useEffect(() => {
     axiosClient
       .get("/companies/all")
       .then((res) => {
@@ -78,6 +86,8 @@ const Prevoznici = () => {
             <Accordion
               key={company.company_id}
               id={company.company_id}
+              customClass=""
+              isCollapsed={false}
               onCollapse={() => false}
               header={
                 <div>

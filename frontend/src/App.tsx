@@ -14,6 +14,7 @@ import Prevoznici from "./pages/Prevoznici/Prevoznici"
 import axiosClient from "./axios/axiosClient"
 
 import { User } from "./reducers/authentication"
+import PrivateRoute from "./routes/privateRoute/PrivateRoute"
 
 function App() {
   const dispatch = useAuthDispatch()
@@ -80,10 +81,9 @@ function App() {
             <Route
               path="/rezervacije"
               element={
-                <AdminRoute
+                <PrivateRoute
                   Component={<Reservations />}
                   isAuthenticated={loggedIn}
-                  isAdmin={loggedIn && user.role_id === 1 ? true : false}
                 />
               }
             />

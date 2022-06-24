@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom"
 
 interface RouteProps {
-  Component: JSX.Element | JSX.Element[]
+  Component: JSX.Element
   isAuthenticated: boolean
 }
 

@@ -19,3 +19,5 @@
 .station.selected {
   background-color: rgba(241, 254, 255, 0.827);
 }
+@media only screen and (max-width: 599px) {
+}

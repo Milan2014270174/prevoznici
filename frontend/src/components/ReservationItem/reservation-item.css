@@ -1,0 +1,21 @@
+.header-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+.header-info {
+  font-size: 14px;
+}
+.planned-line-subtitle {
+  font-size: 14px;
+  font-weight: bold;
+}
+.station {
+  background-color: rgb(241, 241, 241);
+  padding: 3px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+.station.selected {
+  background-color: rgba(241, 254, 255, 0.827);
+}

@@ -8,8 +8,10 @@ import { User } from "../../reducers/authentication"
 import { Link } from "react-router-dom"
 import ReservationModal from "../../components/modals/ReservationModal/ReservationModal"
 import NewLineModal from "../../components/modals/NewLineModal/NewLineModal"
+import EditLineModal from "../../components/modals/EditLineModal/EditLineModal"
+import Loading from "../../components/Loading/Loading"
 
-export type DestinationType = {
+export type StationType = {
   arrives_at: string
   bus_line_station_id: number
   city_id: number
@@ -24,14 +26,32 @@ export type ReservationModalType = {
   seats_available: number | null
   price: number | null
 }
+export type EditLineModalType = {
+  show: boolean
+  id: number | null
+  company_id: string | number
+  seats_available: number
+  price: number
+  reserved_for_date_at: string
+  startStation: {
+    bus_line_station_id: number | null
+    city_id: string
+    arrives_at: string
+  }
+  endStation: {
+    bus_line_station_id: number | null
+    city_id: string
+    arrives_at: string
+  }
+}
 
 type PlannedLineType = {
   bus_line_id: number
   company_name: string
   company_id: string
   available_seats: number
-  POČETNO: DestinationType | any
-  KRAJNJE: DestinationType | any
+  POČETNO: StationType | any
+  KRAJNJE: StationType | any
 }
 
 function sortArray(array: PlannedLineType[]) {
@@ -58,8 +78,20 @@ const initReservationModal = {
   to_bus_line_station_id: null,
   from_bus_line_station_id: null,
   reserved_for_date_at: "",
-  seats_available: null,
-  price: null
+  seats_available: 0,
+  price: 0
+}
+const initEditLineModal = {
+  show: false,
+  id: null,
+  company_id: "",
+  seats_available: 0,
+  price: 0,
+  to_bus_line_station_id: null,
+  from_bus_line_station_id: null,
+  reserved_for_date_at: "",
+  startStation: { bus_line_station_id: null, city_id: "", arrives_at: "" },
+  endStation: { bus_line_station_id: null, city_id: "", arrives_at: "" }
 }
 
 const Home = () => {
@@ -75,6 +107,7 @@ const Home = () => {
   const [plannedLines, setPlannedLines] = useState<PlannedLineType[]>([])
 
   const [companies, setCompanies] = useState([])
+
   const [cities, setCities] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -86,6 +119,8 @@ const Home = () => {
     useState<ReservationModalType>(initReservationModal)
   const [authModal, setAuthModal] = useState(false)
   const [newLineModal, setNewLineModal] = useState(false)
+  const [editLineModal, setEditLineModal] =
+    useState<EditLineModalType>(initEditLineModal)
 
   function addNewLine(plannedLine: PlannedLineType, date: string) {
     setInput({
@@ -100,9 +135,18 @@ const Home = () => {
     setSuccessMessage("Uspešno ste dodali novu liniju.")
   }
 
+  // function editPlannedLine(body: NewLineInputType) {
+  //   console.log(body)
+  // }
+
   function submitReservation() {
     setReservationModal(initReservationModal)
     setSuccessReservationModal(true)
+    getLines()
+  }
+  function submitEditLine() {
+    setEditLineModal(initEditLineModal)
+    setSuccessMessage("Uspešno ste izmenili liniju")
   }
 
   function handleInputChange(event: React.ChangeEvent<HTMLSelectElement>) {
@@ -114,8 +158,8 @@ const Home = () => {
 
   function openReservationModal(
     ticket_type: string,
-    to_bus_line_station_id: number | null,
     from_bus_line_station_id: number | null,
+    to_bus_line_station_id: number | null,
     reserved_for_date_at: string,
     seats_available: number | null,
     price: number | null
@@ -131,35 +175,78 @@ const Home = () => {
       price: price
     })
   }
+  function openEditLineModal(id: number, price: number) {
+    console.log("EditLine", id)
+    let plannedLine
+    for (let i = 0; i < plannedLines.length; i++) {
+      if (plannedLines[i].bus_line_id === id) {
+        plannedLine = plannedLines[i]
+        break
+      }
+    }
+    if (plannedLine) {
+      setEditLineModal({
+        show: true,
+        id: id,
+        reserved_for_date_at: input.date,
+        company_id: plannedLine.company_id,
+        seats_available: plannedLine.available_seats,
+        startStation: {
+          bus_line_station_id: plannedLine.POČETNO.bus_line_station_id,
+          city_id: plannedLine.POČETNO.city_id,
+          arrives_at: plannedLine.POČETNO.arrives_at.slice(0, -3)
+        },
+        endStation: {
+          bus_line_station_id: plannedLine.KRAJNJE.bus_line_station_id,
+          city_id: plannedLine.KRAJNJE.city_id,
+          arrives_at: plannedLine.KRAJNJE.arrives_at.slice(0, -3)
+        },
+        price: price
+      })
+    }
+  }
   function closeReservationModal() {
     setReservationModal(initReservationModal)
   }
-  function closeAuthModal() {
-    setAuthModal(false)
+
+  function getLines() {
+    console.log("get Lines")
+    setLoading(true)
+    axiosClient
+      .get(
+        `/bus-lines/all?date=${input.date}${
+          input.startDestination ? `&cityFrom=${input.startDestination}` : ""
+        }${input.endDestination ? `&cityTo=${input.endDestination}` : ""}${
+          input.prevoznik ? `&prevoznik=${input.prevoznik}` : ""
+        }`
+      )
+      .then((res) => {
+        console.log("bus lines", res.data)
+        setPlannedLines(sortArray(res.data.busLines))
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.log(err)
+        setLoading(false)
+      })
   }
 
   useEffect(() => {
-    // /bus-lines/all?cityFrom=19&cityTo=26&date=2022-06-16
     if (input.date && input.startDestination && input.endDestination) {
-      axiosClient
-        .get(
-          `/bus-lines/all?date=${input.date}${
-            input.startDestination ? `&cityFrom=${input.startDestination}` : ""
-          }${input.endDestination ? `&cityTo=${input.endDestination}` : ""}${
-            input.prevoznik ? `&prevoznik=${input.prevoznik}` : ""
-          }`
-        )
-        .then((res) => {
-          console.log("bus lines", res.data)
-          setPlannedLines(sortArray(res.data.busLines))
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+      getLines()
     } else {
       setPlannedLines([])
     }
   }, [input])
+
+  useEffect(() => {
+    if (successMessage.length > 0) {
+      getLines()
+      setTimeout(() => {
+        setSuccessMessage("")
+      }, 5000)
+    }
+  }, [successMessage])
 
   useEffect(() => {
     axiosClient.get("/companies/all").then((res) => {
@@ -178,7 +265,9 @@ const Home = () => {
         className="hero d-flex justify-content-start align-items-center"
         style={{ backgroundImage: `url('images/hero.png')` }}
       >
-        <h1 className="title">Online prodaja karata</h1>
+        <div className="container w-100 d-flex justify-content-center justify-content-md-start">
+          <h1 className="hero-title">Online rezervacije karata</h1>
+        </div>
       </div>
       <div className="container py-5">
         <div className="search-wrapper">
@@ -265,16 +354,10 @@ const Home = () => {
             </div>
           </div>
         </div>
-        {input.date && input.startDestination && input.endDestination ? (
-          <h3 className="page-title my-5">
-            Rezultati pretrage za datum: <br />{" "}
-            {new Date(input.date).toLocaleDateString("sr-RS")}
-          </h3>
-        ) : (
-          <h3 className="page-title my-5">
-            Morate izabrati datum, mesto polaska i dolaska
-          </h3>
-        )}
+        <h3 className="page-title my-5">
+          Rezultati pretrage za datum: <br />{" "}
+          {new Date(input.date).toLocaleDateString("sr-RS")}
+        </h3>
 
         {successMessage.length > 0 ? (
           <p className="info-text">{successMessage}</p>
@@ -289,32 +372,46 @@ const Home = () => {
             <p className="help-text">
               Nema rezultata pretrage za izabrane filtere
             </p>
+          ) : input.date && input.startDestination && input.endDestination ? (
+            loading ? (
+              <Loading />
+            ) : (
+              plannedLines.map((plannedLine: PlannedLineType, i) => {
+                return (
+                  <PlannedLine
+                    key={plannedLine.bus_line_id}
+                    id={plannedLine.bus_line_id}
+                    company={plannedLine.company_name}
+                    seats={plannedLine.available_seats}
+                    seatsTotal={0}
+                    startDestination={
+                      plannedLine.POČETNO ? plannedLine.POČETNO.city_name : ""
+                    }
+                    endDestination={
+                      plannedLine.KRAJNJE ? plannedLine.KRAJNJE.city_name : ""
+                    }
+                    startTime={
+                      plannedLine.POČETNO
+                        ? plannedLine.POČETNO.arrives_at.slice(0, -3)
+                        : ""
+                    }
+                    endTime={
+                      plannedLine.KRAJNJE
+                        ? plannedLine.KRAJNJE.arrives_at.slice(0, -3)
+                        : ""
+                    }
+                    // editPlannedLine={editPlannedLine}
+                    date={input.date}
+                    openModal={openReservationModal}
+                    openEditLineModal={openEditLineModal}
+                  />
+                )
+              })
+            )
           ) : (
-            plannedLines.map((plannedLine: PlannedLineType, i) => {
-              return (
-                <PlannedLine
-                  key={plannedLine.bus_line_id}
-                  id={plannedLine.bus_line_id}
-                  company={plannedLine.company_name}
-                  seats={plannedLine.available_seats}
-                  seatsTotal={0}
-                  startDestination={
-                    plannedLine.POČETNO ? plannedLine.POČETNO.city_name : ""
-                  }
-                  endDestination={
-                    plannedLine.KRAJNJE ? plannedLine.KRAJNJE.city_name : ""
-                  }
-                  startTime={
-                    plannedLine.POČETNO ? plannedLine.POČETNO.arrives_at : ""
-                  }
-                  endTime={
-                    plannedLine.KRAJNJE ? plannedLine.KRAJNJE.arrives_at : ""
-                  }
-                  date={input.date}
-                  openModal={openReservationModal}
-                />
-              )
-            })
+            <p className="help-text">
+              Morate izabrati mesto polaska i mesto dolaska
+            </p>
           )}
         </div>
       </div>
@@ -389,6 +486,18 @@ const Home = () => {
               closeModal={() => setNewLineModal(false)}
               addNewLine={addNewLine}
             ></NewLineModal>
+          ) : (
+            ""
+          )}
+          {editLineModal.show ? (
+            <EditLineModal
+              title={"Uredi planiranu liniju"}
+              dataInput={editLineModal}
+              closeModal={() =>
+                setEditLineModal({ ...editLineModal, show: false })
+              }
+              submitEdit={submitEditLine}
+            ></EditLineModal>
           ) : (
             ""
           )}

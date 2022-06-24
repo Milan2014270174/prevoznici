@@ -3,6 +3,8 @@ import Accordion from "../Accordion/Accordion"
 import "./planned-line.css"
 import axiosClient from "../../axios/axiosClient"
 import Loading from "../Loading/Loading"
+import { User } from "../../reducers/authentication"
+import { useAuthState } from "../../context/authentication"
 
 interface PlannedLine {
   id: number
@@ -14,14 +16,16 @@ interface PlannedLine {
   startTime: string
   endTime: string
   date: string
+
   openModal: (
     ticket_type: string,
-    to_bus_line_station_id: number | null,
     from_bus_line_station_id: number | null,
+    to_bus_line_station_id: number | null,
     reserved_for_date_at: string,
     seats_available: number,
     price: number
   ) => any
+  openEditLineModal: (id: number, price: number) => any
 }
 
 type Station = {
@@ -29,6 +33,7 @@ type Station = {
   bus_line_id: number
   bus_line_station_id: number
   bus_line_station_type: string
+  availableSeatsNumber: number
   city_id: 16
   city_name: string
 }
@@ -50,8 +55,11 @@ const PlannedLine = ({
   startTime,
   endTime,
   date,
+  openEditLineModal,
   openModal
 }: PlannedLine) => {
+  const user: User | any = useAuthState().user
+
   const [plannedLineStations, setPlannedLineStations] = useState<Station[]>([])
   const [selectedStations, setSelectedStations] = useState<SelectedStations>({
     start: {
@@ -64,6 +72,7 @@ const PlannedLine = ({
     }
   })
   const [loadingStations, setLoadingStations] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const [price, setPrice] = useState<number | null>(null)
   const [secondPrice, setSecondPrice] = useState<number | null>(null)
   const [priceLoading, setPriceLoading] = useState(true)
@@ -121,6 +130,13 @@ const PlannedLine = ({
     }
   }
 
+  function setEditLineModal() {
+    if (price) {
+      openEditLineModal(id, price)
+      setIsCollapsed(false)
+    }
+  }
+
   function getPlannedLineStations(id: number) {
     setLoadingStations(true)
     axiosClient
@@ -147,6 +163,7 @@ const PlannedLine = ({
               bus_line_id: station.bus_line_id,
               bus_line_station_id: station.bus_line_station_id,
               bus_line_station_type: station.bus_line_station_type,
+              availableSeatsNumber: station.availableSeatsNumber,
               city_id: station.city_id,
               city_name: station.city_name
             }
@@ -193,8 +210,8 @@ const PlannedLine = ({
         .then((res) => {
           console.log(res.data)
           setPriceLoading(false)
-          setPrice(res.data.price)
-          setSecondPrice(res.data.price * 1.9)
+          setPrice(res.data.price.oneWay)
+          setSecondPrice(res.data.price.roundTrip)
         })
         .catch((err) => {
           console.log(err)
@@ -212,20 +229,21 @@ const PlannedLine = ({
   return (
     <Accordion
       id={id}
+      customClass=""
       onCollapse={getPlannedLineStations}
+      isCollapsed={isCollapsed}
       header={
         <div className="row col-12 p-1">
-          <div className="col-6 col-md-4 d-flex flex-column justify-content-center">
+          <div className="mb-3 mb-md-0 col-12 col-md-4 d-flex flex-column justify-content-center">
             <h4 className="header-title">{company || ""}</h4>
-            <p className="header-info mb-0">Broj slobodnih mesta: {seats}</p>
           </div>
-          <div className="row col-6 col-md-8">
-            <div className="col-12 col-md-8 d-flex justify-content-end justify-content-md-center align-items-center">
+          <div className="row col-12 col-md-8">
+            <div className="col-12 col-md-8 d-flex justify-content-start justify-content-md-center align-items-center">
               <h4 className="header-title">
                 {startDestination} - {endDestination}
               </h4>
             </div>
-            <div className="col-12 col-md-4 d-flex justify-content-end align-items-center">
+            <div className="col-12 col-md-4 d-flex justify-content-start align-items-center">
               {startTime} - {endTime}
             </div>
           </div>
@@ -262,26 +280,32 @@ const PlannedLine = ({
                     return (
                       <div
                         key={i}
-                        className={`station d-flex justify-content-between gap-3 mb-3 ${
+                        className={`station mb-3 ${
                           isColored ? "selected" : ""
                         }`}
                         onClick={() =>
                           selectStation(i, station.bus_line_station_id)
                         }
                       >
-                        <h4 className="planned-line-subtitle mb-0">
-                          {station.city_name} ({station.bus_line_station_type})
-                        </h4>
-                        <div className="station-info d-flex align-items-center gap-3">
-                          <p className="station-time mb-0">
-                            {station.arrives_at}
-                          </p>
-                          {isSelected ? (
-                            <i className="fa-solid fa-circle"></i>
-                          ) : (
-                            <i className="fa-solid fa-circle-dot"></i>
-                          )}
+                        <div className="station-wrapper d-flex justify-content-between gap-3">
+                          <h4 className="planned-line-subtitle mb-0">
+                            {station.city_name} ({station.bus_line_station_type}
+                            )
+                          </h4>
+                          <div className="station-info d-flex align-items-center gap-3">
+                            <p className="station-time mb-0">
+                              {station.arrives_at}
+                            </p>
+                            {isSelected ? (
+                              <i className="fa-solid fa-circle-dot"></i>
+                            ) : (
+                              <i className="fa-solid fa-circle"></i>
+                            )}
+                          </div>
                         </div>
+                        <p className="help-text">
+                          Broj slobodnih mesta: {station.availableSeatsNumber}
+                        </p>
                       </div>
                     )
                   })
@@ -297,8 +321,8 @@ const PlannedLine = ({
                 )}
               </div>
             </div>
-            <div className="row col-4 col-md-6 d-flex justify-content-end align-items-center">
-              <div className="col-12 d-flex flex-column align-items-end">
+            <div className="row col-12 col-md-6 d-flex justify-content-md-end align-items-start">
+              <div className="col-12 d-flex flex-column align-items-start align-items-md-end">
                 <h4 className="planned-line-subtitle mb-2">
                   Cena karte u jednom smeru
                 </h4>
@@ -330,7 +354,7 @@ const PlannedLine = ({
                 )}
               </div>
               <div className="col-12">
-                <div className="col-12 d-flex flex-column align-items-end">
+                <div className="col-12 d-flex flex-column align-items-start align-items-md-end">
                   <h4 className="planned-line-subtitle mb-2">
                     Cena povratne karte
                   </h4>
@@ -363,6 +387,18 @@ const PlannedLine = ({
                   )}
                 </div>
               </div>
+              {Object.keys(user).length > 0 && user.role_id === 1 ? (
+                <div className="col-12 d-flex justify-content-end mt-4">
+                  <p
+                    className="info-text link"
+                    onClick={() => setEditLineModal()}
+                  >
+                    Edit
+                  </p>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
           </div>
         </div>

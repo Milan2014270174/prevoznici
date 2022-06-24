@@ -4,12 +4,21 @@ import "./accordion.css"
 interface AccordionProps {
   header: React.ReactNode
   body: React.ReactNode
+  customClass: string
   id: number
+  isCollapsed: boolean
   onCollapse: (params: number) => any
 }
 
-const Accordion = ({ header, body, onCollapse, id }: AccordionProps) => {
-  const [collapsed, setCollapsed] = useState(false)
+const Accordion = ({
+  header,
+  customClass,
+  isCollapsed,
+  body,
+  onCollapse,
+  id
+}: AccordionProps) => {
+  const [collapsed, setCollapsed] = useState(isCollapsed ? isCollapsed : false)
 
   function handleCollapse() {
     setCollapsed(!collapsed)
@@ -22,7 +31,11 @@ const Accordion = ({ header, body, onCollapse, id }: AccordionProps) => {
   }, [collapsed])
 
   return (
-    <div className={`accordion-item ${collapsed ? "show" : ""}`}>
+    <div
+      className={`accordion-item ${collapsed ? "show" : ""} ${
+        customClass ? customClass : ""
+      }`}
+    >
       <h2 className="accordion-header" id="headingOne">
         <button
           className={`accordion-button ${collapsed ? "show" : "collapsed"} ${
