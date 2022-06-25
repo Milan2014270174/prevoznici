@@ -6,6 +6,7 @@ import { ParamMissingError } from '@shared/errors';
 
 import { body, validationResult } from 'express-validator';
 import { ICompany } from '../../models/company-model';
+import { ICreateCompanyRequestDto } from './dtos/company/create-company-request.dto';
 
 
 
@@ -39,7 +40,7 @@ router.get(p.get, async (_: Request, res: Response) => {
  */
 router.post(p.add,
   body('company_name').isString().withMessage('Unesite naziv kompanije'),
-  async (req: Request, res: Response) => {
+  async (req: ICreateCompanyRequestDto, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

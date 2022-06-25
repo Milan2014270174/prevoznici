@@ -8,6 +8,8 @@ import ticketService from '../../services/ticket-service';
 import { ITicket } from '../../models/ticket-model';
 import jwtUtil from '../../util/jwt-util';
 import { IUser } from '../../models/user-model';
+import { IUpdateTicketRequestDto } from './dtos/ticket/update-ticket-request.dto';
+import { ICreateTicketRequestDto } from './dtos/ticket/create-ticket-request.dto';
 
 
 
@@ -36,7 +38,7 @@ router.get(p.get, async (_: Request, res: Response) => {
 router.put(p.update,
   body('ticket_id').notEmpty(),
   body('ticket').notEmpty(),
-  async (req: Request, res: Response) => {
+  async (req: IUpdateTicketRequestDto, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -64,14 +66,14 @@ router.post(p.add,
     .if(body('to_bus_line_station_id').exists())
     .notEmpty()
     .custom((value, { req }) => value !== req.body.to_bus_line_station_id),
-  async (req: Request, res: Response) => {
+  async (req: ICreateTicketRequestDto, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const ticket: ITicket = req.body;
+    const ticket = req.body;
     // Check param
     if (!ticket) {
       throw new ParamMissingError();

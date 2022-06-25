@@ -1,7 +1,6 @@
 import { Router } from "express"
 import { adminMw, userMw } from "./middleware"
 import authRouter from "./auth-router"
-import adminUserRouter from "./admin/admin-user-router"
 import adminBusLineRouter from "./admin/admin-bus-line-router"
 import adminBusLineStationRouter from "./admin/admin-bus-line-station-router"
 import adminCompanyRouter from "./admin/admin-company-router"
@@ -20,7 +19,6 @@ import ticketRouter from "./public/ticket-router"
 const apiRouter = Router()
 
 // Admin rute
-apiRouter.use("/admin/users", adminMw, adminUserRouter)
 apiRouter.use("/admin/bus-lines", adminMw, adminBusLineRouter)
 apiRouter.use("/admin/bus-line-stations", adminMw, adminBusLineStationRouter)
 apiRouter.use("/admin/companies", adminMw, adminCompanyRouter)

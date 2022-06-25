@@ -1,10 +1,11 @@
 import StatusCodes from 'http-status-codes';
-import { query, Request, Response, Router } from 'express';
+import { Request, Response, Router } from 'express';
 import busLineService from '../../services/bus-line-service';
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
 import ticketService from '../../services/ticket-service';
+import { ICalculateTicketPriceRequestDto } from './dtos/ticket/calculate-ticket-price-request.dto';
 
 
 
@@ -23,7 +24,9 @@ export const p = {
  * Get all busLines.
  */
 router.get(p.calculatePrice,
-  async (req: Request, res: Response) => {
+  query('from_bus_line_station_id').notEmpty().withMessage('Morate izabrati do kog grada.'),
+  query('to_bus_line_station_id').notEmpty().withMessage('Morate izabrati od kog grada.'),
+  async (req: ICalculateTicketPriceRequestDto, res: Response) => {
     const price = await ticketService.createTicketDryRun(req.query);
     return res.status(OK).json({ price });
   });

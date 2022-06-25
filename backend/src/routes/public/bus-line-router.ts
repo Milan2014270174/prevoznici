@@ -1,9 +1,10 @@
 import StatusCodes from 'http-status-codes';
 import { Request, Response, Router } from 'express';
 import busLineService from '../../services/bus-line-service';
-import { body, validationResult } from 'express-validator';
+import { body, query, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
+import { IFilterBusLinesRequestDto } from './dtos/bus-line/filter-bus-lines-request.dto';
 
 
 
@@ -24,13 +25,18 @@ export const p = {
 /**
  * Get all busLines.
  */
-router.get(p.get, async (req: Request, res: Response) => {
+router.get(p.get,
+  query('company_id').optional(),
+  query('cityTo').notEmpty().withMessage('Morate izabrati do kog grada.'),
+  query('cityFrom').notEmpty().withMessage('Morate izabrati od kog grada.'),
+  query('date').notEmpty().withMessage('Morate izabrati datum.'),
+  async (req: IFilterBusLinesRequestDto, res: Response) => {
 
   let busLines = [] as any;
   if (req.query.cityFrom && req.query.cityTo && req.query.date) {
 
     const companyId = req.query.company_id;
-
+    
     if (!companyId) {
 
       busLines = await busLineService.filterBusLines(

@@ -5,6 +5,7 @@ import { body, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
 import { IBusLineStation } from '../../models/bus_line_station-model';
+import { IGetBusLineStationsRequest } from './dtos/bus-line-station/get-bus-line-stations-request.dto';
 
 
 
@@ -21,10 +22,12 @@ export const p = {
 } as const;
 
 
-
+/**
+ * Gets all bus line stations by bus_line_id
+ */
 router.get(p.get,
   body('bus_line_id').isNumeric(),
-  async (req: Request, res: Response) => {
+  async (req: IGetBusLineStationsRequest, res: Response) => {
 
     return res.status(OK).json({
       busLineStations: await busLineStationService.getByBusLineId(req.body.bus_line_id as number)
@@ -32,6 +35,7 @@ router.get(p.get,
   })
 
 /**
+ * @deprecated - don't use.
  * Add one busLine.
  */
 router.post(p.add,

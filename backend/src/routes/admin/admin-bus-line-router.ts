@@ -4,6 +4,9 @@ import busLineService from '../../services/bus-line-service';
 import { body, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
+import { IUpdateBusLineRequestDto } from './dtos/bus-line/update-bus-line-request.dto';
+import { IBusLine } from '../../models/bus_line-model';
+import { ICreateBusLineRequestDto } from './dtos/bus-line/add-bus-line-request.dto';
 
 
 
@@ -33,14 +36,14 @@ router.post(p.add,
   body('stations.*.arrives_at')
     .custom((value: string) => new RegExp(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).test(value)),
   body('stations.*.bus_line_station_type').isIn(['IZMEĐU', 'POČETNO', 'KRAJNJE']),
-  async (req: Request, res: Response) => {
+  async (req: ICreateBusLineRequestDto, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const {line, stations} = req.body;
+    const { line, stations } = req.body;
     console.log(line);
     // Check param
     if (!line) {
@@ -68,7 +71,7 @@ router.put(p.update,
   body('stations.*.arrives_at')
     .custom((value: string) => new RegExp(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).test(value)).optional(),
   body('stations.*.bus_line_station_type').isIn(['IZMEĐU', 'POČETNO', 'KRAJNJE']).optional(),
-  async (req: Request, res: Response) => {
+  async (req: IUpdateBusLineRequestDto, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

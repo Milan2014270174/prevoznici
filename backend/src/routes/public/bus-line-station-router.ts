@@ -5,6 +5,7 @@ import { body, query, validationResult } from 'express-validator';
 
 import { ParamMissingError } from '@shared/errors';
 import { IBusLineStation } from '../../models/bus_line_station-model';
+import { IGetBusLineStationsRequest } from './dtos/bus-line-station/get-bus-line-stations-request.dto';
 
 
 
@@ -24,7 +25,7 @@ export const p = {
 
 router.get(p.get,
   query('bus_line_id').notEmpty(),
-  async (req: Request, res: Response) => {
+  async (req: IGetBusLineStationsRequest, res: Response) => {
 
     return res.status(OK).json({
       busLineStations: await busLineStationService.getByBusLineId(req.query.bus_line_id as any)

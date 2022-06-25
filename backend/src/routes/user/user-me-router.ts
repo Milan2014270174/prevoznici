@@ -20,20 +20,12 @@ export const p = {
  * Get all.
  */
 router.get(p.getMe, async (req: Request, res: Response) => {
-  // NEW CODE
+
   const jwt = req.headers.authorization?.substring(7, 9999) as string
   const clientData = (await jwtUtil.decode(jwt)) as IUser
   if (typeof clientData == "object") {
     return res.status(OK).json({ clientData })
   }
-
-  // OLD CODE
-  // const user = (await jwtUtil.decode(
-  //   req.headers.authorization?.substring(7, 9999) as string
-  // )) as IUser
-
-  // const users = await userService.getByEmail(user)
-  // return res.status(OK).json({ users })
 })
 
 // Export default
