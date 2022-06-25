@@ -56,7 +56,8 @@ const ReservationModal = ({
           ticket_type: ticket_type,
           to_bus_line_station_id: to_bus_line_station_id,
           from_bus_line_station_id: from_bus_line_station_id,
-          number_of_tickets: input.ticketNumber
+          number_of_tickets: input.ticketNumber,
+          is_paid: input.is_paid
         })
         .then((res) => {
           console.log(res.data)
