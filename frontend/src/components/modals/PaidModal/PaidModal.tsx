@@ -1,4 +1,3 @@
-import React from "react"
 import { useAuthState } from "../../../context/authentication"
 import { User } from "../../../reducers/authentication"
 

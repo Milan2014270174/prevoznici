@@ -328,7 +328,9 @@ const NewLineModal = ({ title, closeModal, addNewLine }: NewLineModalProps) => {
                     return (
                       <div key={i} className="row col-12">
                         <div className="search-column mb-2 col-6">
-                          <label htmlFor={`station${i}`}>Stajalište {i}</label>
+                          <label htmlFor={`station${i}`}>
+                            Stajalište {i + 1}
+                          </label>
                           <select
                             name={`station${i}`}
                             id={`station${i}`}

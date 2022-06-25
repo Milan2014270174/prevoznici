@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import Accordion from "../Accordion/Accordion"
 import "./planned-line.css"
 import axiosClient from "../../axios/axiosClient"
@@ -25,16 +25,20 @@ interface PlannedLine {
     seats_available: number,
     price: number
   ) => any
-  openEditLineModal: (id: number, price: number) => any
+  openEditLineModal: (
+    id: number,
+    price: number,
+    plannedLineStations: Station[]
+  ) => any
 }
 
-type Station = {
+export type Station = {
   arrives_at: string
   bus_line_id: number
   bus_line_station_id: number
   bus_line_station_type: string
   availableSeatsNumber: number
-  city_id: 16
+  city_id: number | string
   city_name: string
 }
 type SelectedStation = {
@@ -74,6 +78,7 @@ const PlannedLine = ({
   const [loadingStations, setLoadingStations] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [price, setPrice] = useState<number | null>(null)
+  const [initialPrice, setInitialPrice] = useState<number | null>(null)
   const [secondPrice, setSecondPrice] = useState<number | null>(null)
   const [priceLoading, setPriceLoading] = useState(true)
   const [errorStations, setErrorStations] = useState("")
@@ -131,8 +136,8 @@ const PlannedLine = ({
   }
 
   function setEditLineModal() {
-    if (price) {
-      openEditLineModal(id, price)
+    if (initialPrice) {
+      openEditLineModal(id, initialPrice, plannedLineStations)
       setIsCollapsed(false)
     }
   }
@@ -159,7 +164,7 @@ const PlannedLine = ({
               })
             }
             return {
-              arrives_at: station.arrives_at,
+              arrives_at: station.arrives_at.slice(0, -3),
               bus_line_id: station.bus_line_id,
               bus_line_station_id: station.bus_line_station_id,
               bus_line_station_type: station.bus_line_station_type,
@@ -179,13 +184,22 @@ const PlannedLine = ({
         }
         for (let i = 0; i < tempStations.length; i++) {
           if (tempStations[i].bus_line_station_type === "POČETNO") {
-            console.log("POČETNO")
             start = { i: i, id: tempStations[i].bus_line_station_id }
           }
           if (tempStations[i].bus_line_station_type === "KRAJNJE") {
             end = { i: i, id: tempStations[i].bus_line_station_id }
           }
         }
+        axiosClient
+          .get("/tickets/calculate-price", {
+            params: {
+              from_bus_line_station_id: start.id,
+              to_bus_line_station_id: end.id
+            }
+          })
+          .then((res) => {
+            setInitialPrice(res.data.price.oneWay)
+          })
         setSelectedStations({
           start,
           end

@@ -2,7 +2,6 @@ import axios, { HeadersDefaults } from "axios"
 
 const axiosClient = axios.create()
 
-// authHeader();
 interface CommonHeaderProperties extends HeadersDefaults {
   "Content-Type": string
   Accept: string

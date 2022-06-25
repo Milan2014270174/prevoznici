@@ -1,6 +1,3 @@
-//
-
-import React, { useReducer } from "react"
 import { setToken } from "../axios/axiosClient"
 
 let token = localStorage.getItem("prevozniciJWT")

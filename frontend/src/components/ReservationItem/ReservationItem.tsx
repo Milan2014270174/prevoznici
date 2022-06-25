@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from "react"
 import Accordion from "../Accordion/Accordion"
 import "./reservation-item.css"
-import axiosClient from "../../axios/axiosClient"
-import Loading from "../Loading/Loading"
 import { User } from "../../reducers/authentication"
 import { useAuthState } from "../../context/authentication"
 
@@ -89,7 +86,7 @@ const ReservationItem = ({
                   Cena {seats > 1 ? "karata" : "karte"}
                 </h4>
 
-                <p className={`info-text`}>{price * seats} RSD</p>
+                <p className={`info-text`}>{price} RSD</p>
                 {user.role_id === 1 ? (
                   !isPaid ? (
                     <button

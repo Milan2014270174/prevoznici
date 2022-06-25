@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import "./home.css"
-import PlannedLine from "../../components/PlannedLine/PlannedLine"
+import PlannedLine, { Station } from "../../components/PlannedLine/PlannedLine"
 import axiosClient from "../../axios/axiosClient"
 import Modal from "../../components/modals/Modal/Modal"
 import { useAuthState } from "../../context/authentication"
@@ -33,16 +33,7 @@ export type EditLineModalType = {
   seats_available: number
   price: number
   reserved_for_date_at: string
-  startStation: {
-    bus_line_station_id: number | null
-    city_id: string
-    arrives_at: string
-  }
-  endStation: {
-    bus_line_station_id: number | null
-    city_id: string
-    arrives_at: string
-  }
+  stations: Station[]
 }
 
 type PlannedLineType = {
@@ -91,7 +82,8 @@ const initEditLineModal = {
   from_bus_line_station_id: null,
   reserved_for_date_at: "",
   startStation: { bus_line_station_id: null, city_id: "", arrives_at: "" },
-  endStation: { bus_line_station_id: null, city_id: "", arrives_at: "" }
+  endStation: { bus_line_station_id: null, city_id: "", arrives_at: "" },
+  stations: []
 }
 
 const Home = () => {
@@ -117,7 +109,6 @@ const Home = () => {
   // Modali
   const [reservationModal, setReservationModal] =
     useState<ReservationModalType>(initReservationModal)
-  const [authModal, setAuthModal] = useState(false)
   const [newLineModal, setNewLineModal] = useState(false)
   const [editLineModal, setEditLineModal] =
     useState<EditLineModalType>(initEditLineModal)
@@ -175,8 +166,11 @@ const Home = () => {
       price: price
     })
   }
-  function openEditLineModal(id: number, price: number) {
-    console.log("EditLine", id)
+  function openEditLineModal(
+    id: number,
+    price: number,
+    plannedLineStations: Station[]
+  ) {
     let plannedLine
     for (let i = 0; i < plannedLines.length; i++) {
       if (plannedLines[i].bus_line_id === id) {
@@ -191,16 +185,7 @@ const Home = () => {
         reserved_for_date_at: input.date,
         company_id: plannedLine.company_id,
         seats_available: plannedLine.available_seats,
-        startStation: {
-          bus_line_station_id: plannedLine.POČETNO.bus_line_station_id,
-          city_id: plannedLine.POČETNO.city_id,
-          arrives_at: plannedLine.POČETNO.arrives_at.slice(0, -3)
-        },
-        endStation: {
-          bus_line_station_id: plannedLine.KRAJNJE.bus_line_station_id,
-          city_id: plannedLine.KRAJNJE.city_id,
-          arrives_at: plannedLine.KRAJNJE.arrives_at.slice(0, -3)
-        },
+        stations: plannedLineStations,
         price: price
       })
     }

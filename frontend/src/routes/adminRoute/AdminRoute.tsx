@@ -14,7 +14,6 @@ const AdminRoute = ({ Component, isAuthenticated, isAdmin }: RouteProps) => {
       replace
       to={{
         pathname: "/login"
-        // state: { from: location },
       }}
     />
   )

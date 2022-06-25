@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import axiosClient from "../../axios/axiosClient"
 import Loading from "../../components/Loading/Loading"
 import PaidModal from "../../components/modals/PaidModal/PaidModal"

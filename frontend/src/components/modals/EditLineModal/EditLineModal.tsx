@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react"
 import axiosClient from "../../../axios/axiosClient"
-import { useAuthState } from "../../../context/authentication"
 import { defaultDate, EditLineModalType } from "../../../pages/Home/Home"
-import { User } from "../../../reducers/authentication"
 
 interface EditLineModalProps {
   title: string
@@ -17,67 +15,66 @@ const EditLineModal = ({
   closeModal,
   submitEdit
 }: EditLineModalProps) => {
-  const user: User | any = useAuthState().user
-
   const [input, setInput] = useState({ ...dataInput, error: false })
-
-  const [companies, setCompanies] = useState([])
   const [cities, setCities] = useState([])
 
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     setInput({ ...input, [event.target.name]: event.target.value })
   }
-  function handleStartStationInput(
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) {
-    setInput({
-      ...input,
-      startStation: {
-        ...input.startStation,
-        city_id: event.target.value
-      }
-    })
-  }
-  function handleEndStationInput(event: React.ChangeEvent<HTMLSelectElement>) {
-    setInput({
-      ...input,
-      endStation: {
-        ...input.endStation,
-        city_id: event.target.value
-      }
-    })
-  }
-  function handleStartDateChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setInput({
-      ...input,
-      startStation: {
-        ...input.startStation,
-        arrives_at: event.target.value
-      }
-    })
-  }
-  function handleEndDateChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setInput({
-      ...input,
-      endStation: {
-        ...input.endStation,
-        arrives_at: event.target.value
-      }
-    })
-  }
   function handleDateChange(event: React.ChangeEvent<HTMLInputElement>) {
     setInput({ ...input, [event.target.name]: event.target.value })
   }
 
+  function handleStationsInputChange(
+    id: number,
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) {
+    setInput({
+      ...input,
+      stations: input.stations.map((station) => {
+        if (station.bus_line_station_id === id) {
+          return {
+            ...station,
+            city_id: event.target.value
+          }
+        } else {
+          return station
+        }
+      })
+    })
+  }
+  function handleStationsDateChange(
+    id: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setInput({
+      ...input,
+      stations: input.stations.map((station) => {
+        if (station.bus_line_station_id === id) {
+          return {
+            ...station,
+            arrives_at: event.target.value
+          }
+        } else {
+          return station
+        }
+      })
+    })
+  }
+
   function handleSubmit() {
+    let fault = false
+    for (let i = 0; i < input.stations.length; i++) {
+      if (input.stations[i].arrives_at === "" || !input.stations[i].city_id) {
+        fault = true
+        break
+      }
+    }
     if (
       input.seats_available > 0 &&
       input.price > 0 &&
-      input.startStation.city_id &&
-      input.reserved_for_date_at.length > 0 &&
-      input.endStation.city_id &&
-      input.startStation.arrives_at.length > 0 &&
-      input.endStation.arrives_at.length > 0
+      !fault &&
+      input.reserved_for_date_at.length > 0
     ) {
       console.log("submit")
       axiosClient
@@ -88,20 +85,7 @@ const EditLineModal = ({
             available_seats: input.seats_available,
             company_id: input.company_id
           },
-          stations: [
-            {
-              bus_line_station_id: input.startStation.bus_line_station_id,
-              arrives_at: input.startStation.arrives_at,
-              bus_line_station_type: "POČETNO",
-              city_id: input.startStation.city_id
-            },
-            {
-              bus_line_station_id: input.endStation.bus_line_station_id,
-              arrives_at: input.endStation.arrives_at,
-              bus_line_station_type: "KRAJNJE",
-              city_id: input.endStation.city_id
-            }
-          ]
+          stations: input.stations
         })
         .then((res) => {
           console.log(res.data)
@@ -116,10 +100,6 @@ const EditLineModal = ({
   }
 
   useEffect(() => {
-    axiosClient.get("/companies/all").then((res) => {
-      console.log("companies", res.data)
-      setCompanies(res.data.companys)
-    })
     axiosClient.get("/cities/all").then((res) => {
       console.log("companies", res.data)
       setCities(res.data.companys)
@@ -181,87 +161,182 @@ const EditLineModal = ({
                   }`}
                 />
               </div>
-              <div className="search-column mb-2 col-6">
-                <label htmlFor="startDestination">Mesto polaska</label>
-                <select
-                  name="startDestination"
-                  id="startDestination"
-                  placeholder="Mesto polaska"
-                  className={`select form-select ${
-                    input.startStation.city_id === "" && input.error
-                      ? "is-invalid"
-                      : ""
-                  }`}
-                  value={input.startStation.city_id}
-                  onChange={handleStartStationInput}
-                >
-                  <option value="">Izaberi mesto polaska</option>
-                  {cities
-                    ? cities.map((city: any) => {
-                        return (
-                          <option key={city.city_id} value={city.city_id}>
-                            {city.city_name}
-                          </option>
-                        )
-                      })
-                    : ""}
-                </select>
-              </div>
-              <div className="search-column mb-2 col-6">
-                <label htmlFor="startTime">Vreme polaska</label>
-                <input
-                  id="startTime"
-                  name="startTime"
-                  value={input.startStation.arrives_at}
-                  onChange={handleStartDateChange}
-                  type="time"
-                  className={`form-control ${
-                    input.startStation.arrives_at === "" && input.error
-                      ? "is-invalid"
-                      : ""
-                  }`}
-                />
-              </div>
-              <div className="search-column mb-2 col-6">
-                <label htmlFor="endDestination">Odredište</label>
-                <select
-                  name="endDestination"
-                  id="endDestination"
-                  className={`select form-select ${
-                    input.endStation.city_id === "" && input.error
-                      ? "is-invalid"
-                      : ""
-                  }`}
-                  value={input.endStation.city_id}
-                  onChange={handleEndStationInput}
-                >
-                  <option value="">Izaberi odredište</option>
-                  {cities
-                    ? cities.map((city: any) => {
-                        return (
-                          <option key={city.city_id} value={city.city_id}>
-                            {city.city_name}
-                          </option>
-                        )
-                      })
-                    : ""}
-                </select>
-              </div>
-              <div className="search-column mb-2 col-6">
-                <label htmlFor="endTime">Vreme dolaska</label>
-                <input
-                  id="endTime"
-                  name="endTime"
-                  value={input.endStation.arrives_at}
-                  onChange={handleEndDateChange}
-                  type="time"
-                  className={`form-control ${
-                    input.endStation.arrives_at === "" && input.error
-                      ? "is-invalid"
-                      : ""
-                  }`}
-                />
-              </div>
+              {input.stations.map((station, i) => {
+                if (i === 0) {
+                  return (
+                    <>
+                      <div className="search-column mb-2 col-6">
+                        <label htmlFor="startDestination">Mesto polaska</label>
+                        <select
+                          name="startDestination"
+                          id="startDestination"
+                          placeholder="Mesto polaska"
+                          className={`select form-select ${
+                            !station.city_id && input.error ? "is-invalid" : ""
+                          }`}
+                          value={station.city_id}
+                          onChange={(e) =>
+                            handleStationsInputChange(
+                              station.bus_line_station_id,
+                              e
+                            )
+                          }
+                        >
+                          <option value="">Izaberi mesto polaska</option>
+                          {cities
+                            ? cities.map((city: any) => {
+                                return (
+                                  <option
+                                    key={city.city_id}
+                                    value={city.city_id}
+                                  >
+                                    {city.city_name}
+                                  </option>
+                                )
+                              })
+                            : ""}
+                        </select>
+                      </div>
+                      <div className="search-column mb-2 col-6">
+                        <label htmlFor="startTime">Vreme polaska</label>
+                        <input
+                          id="startTime"
+                          name="startTime"
+                          value={station.arrives_at}
+                          onChange={(e) =>
+                            handleStationsDateChange(
+                              station.bus_line_station_id,
+                              e
+                            )
+                          }
+                          type="time"
+                          className={`form-control ${
+                            station.arrives_at === "" && input.error
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                    </>
+                  )
+                } else if (i === input.stations.length - 1) {
+                  return (
+                    <>
+                      <div className="search-column mb-2 col-6">
+                        <label htmlFor="endDestination">Odredište</label>
+                        <select
+                          name="endDestination"
+                          id="endDestination"
+                          className={`select form-select ${
+                            !station.city_id && input.error ? "is-invalid" : ""
+                          }`}
+                          value={station.city_id}
+                          onChange={(e) =>
+                            handleStationsInputChange(
+                              station.bus_line_station_id,
+                              e
+                            )
+                          }
+                        >
+                          <option value="">Izaberi odredište</option>
+                          {cities
+                            ? cities.map((city: any) => {
+                                return (
+                                  <option
+                                    key={city.city_id}
+                                    value={city.city_id}
+                                  >
+                                    {city.city_name}
+                                  </option>
+                                )
+                              })
+                            : ""}
+                        </select>
+                      </div>
+                      <div className="search-column mb-2 col-6">
+                        <label htmlFor="endTime">Vreme dolaska</label>
+                        <input
+                          id="endTime"
+                          name="endTime"
+                          value={station.arrives_at}
+                          onChange={(e) =>
+                            handleStationsDateChange(
+                              station.bus_line_station_id,
+                              e
+                            )
+                          }
+                          type="time"
+                          className={`form-control ${
+                            station.arrives_at === "" && input.error
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                    </>
+                  )
+                } else {
+                  return (
+                    <>
+                      <div className="search-column mb-2 col-6">
+                        <label htmlFor={`station${i}`}>
+                          Stajalište {i + 1}
+                        </label>
+                        <select
+                          name={`station${i}`}
+                          id={`station${i}`}
+                          className={`select form-select ${
+                            station.city_id === null && input.error
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                          value={station.city_id}
+                          onChange={(e) =>
+                            handleStationsInputChange(
+                              station.bus_line_station_id,
+                              e
+                            )
+                          }
+                        >
+                          <option value="">Izaberi odredište</option>
+                          {cities
+                            ? cities.map((city: any) => {
+                                return (
+                                  <option
+                                    key={city.city_id}
+                                    value={city.city_id}
+                                  >
+                                    {city.city_name}
+                                  </option>
+                                )
+                              })
+                            : ""}
+                        </select>
+                      </div>
+                      <div className="search-column mb-2 col-6">
+                        <label htmlFor="endTime">Vreme dolaska</label>
+                        <input
+                          id="endTime"
+                          name="endTime"
+                          value={station.arrives_at}
+                          onChange={(e) =>
+                            handleStationsDateChange(
+                              station.bus_line_station_id,
+                              e
+                            )
+                          }
+                          type="time"
+                          className={`form-control ${
+                            station.arrives_at === "" && input.error
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                        />
+                      </div>
+                    </>
+                  )
+                }
+              })}
               <div className="search-column mb-2 col-6">
                 <label htmlFor="price">Cena karte u dinarima</label>
                 <input
