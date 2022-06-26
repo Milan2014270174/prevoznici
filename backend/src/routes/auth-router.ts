@@ -6,6 +6,7 @@ import { body, check, validationResult } from 'express-validator';
 import StatusCodes from 'http-status-codes';
 import userRepo from '../database/user-repo';
 import { IUser } from '../models/user-model';
+import { IRegisterUserRequestDto } from './public/dtos/auth/register-user-request.dto';
 
 
 // Constants
@@ -61,7 +62,8 @@ router.post(p.register,
     async val => !!await userRepo.getByEmail(val) 
   ),
   body('password').notEmpty().withMessage('Lozinka ne sme biti prazna.'),
-  async (req: Request, res: Response) => {
+  body('name').notEmpty().withMessage('Molimo Vas unesite vaše ime.'),
+  async (req: IRegisterUserRequestDto, res: Response) => {
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

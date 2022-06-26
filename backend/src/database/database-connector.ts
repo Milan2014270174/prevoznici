@@ -5,10 +5,10 @@ import mysql, { FieldPacket, RowDataPacket } from "mysql2";
 require('dotenv').config({ path: `./scraper/data-poster/.env` })
 const NODE_ENV = process.env.NODE_ENV || "local";
 const conn = mysql.createConnection({
-  host: process.env.DB_HOST || "185.119.88.30",
-  user: process.env.DB_USERNAME || "lightbul_autobuske_karte",
-  database: process.env.DB_DATABASE || "lightbul_autobuske_karte",
-  password: process.env.DB_PASSWORD || "S0&qHEC;I7(*",
+  host: 'localhost',
+  user: 'root',
+  database: 'autobuske_karte',
+  password: '',
   dateStrings: true,
 });
 
